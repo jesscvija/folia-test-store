@@ -961,8 +961,21 @@
     <span class="nav-link" onclick="navigate('wishlist')">Saved</span>
   </div>
   <div class="nav-actions">
-    <div style="position:relative">
-      <button class="nav-icon-btn" onclick="toggleUserMenu()" id="user-nav-btn">
+    <div style="position:relative" id="inbox-nav-wrap">
+      <button class="nav-icon-btn" id="inbox-toggle-btn" onclick="toggleInbox()" style="display:none">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="cart-badge" id="inbox-badge" style="background:var(--sage)">0</span>
+      </button>
+      <div id="inbox-container" style="display:none;position:absolute;top:calc(100% + 8px);right:0;width:320px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 8px 32px rgba(28,28,24,0.12);z-index:300;overflow:hidden;max-height:480px;overflow-y:auto;">
+        <div style="padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-weight:500;font-size:14px">Notifications</div>
+          <button onclick="toggleInbox()" style="background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:18px;line-height:1">×</button>
+        </div>
+        <div id="cio-inbox-feed">
+          <div style="padding:32px 18px;text-align:center;color:var(--ink-faint);font-size:13px">No notifications yet</div>
+        </div>
+      </div>
+    </div>
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span id="nav-user-label">Sign in</span>
       </button>
@@ -1072,7 +1085,7 @@
   <div id="admin-pin-screen" class="admin-pin-screen">
     <div style="font-size:36px;margin-bottom:16px">🔒</div>
     <h2 class="admin-pin-title">Admin panel</h2>
-    <p class="admin-pin-subtitle">Enter the 4-digit PIN to access store settings.<br>Default PIN is <strong>1234</strong>.</p>
+    <p class="admin-pin-subtitle">Enter your 4-digit PIN to access store settings.</p>
     <div class="pin-inputs">
       <input class="pin-input" type="password" maxlength="1" id="pin-0" oninput="pinInput(0)" onkeydown="pinKey(event,0)" inputmode="numeric"/>
       <input class="pin-input" type="password" maxlength="1" id="pin-1" oninput="pinInput(1)" onkeydown="pinKey(event,1)" inputmode="numeric"/>
@@ -1100,7 +1113,6 @@
       <div class="admin-tabs">
         <button class="admin-tab active" onclick="switchAdminTab('products')">Products</button>
         <button class="admin-tab" onclick="switchAdminTab('events')">Events</button>
-        <button class="admin-tab" onclick="switchAdminTab('messages')">In-app messages</button>
         <button class="admin-tab" onclick="switchAdminTab('settings')">Settings</button>
       </div>
 
@@ -1532,13 +1544,68 @@ function logOut() {
   iabShown = {};
   document.getElementById('nav-user-label').textContent = 'Sign in';
   document.getElementById('user-menu').style.display = 'none';
+  document.getElementById('inbox-toggle-btn').style.display = 'none';
+  document.getElementById('inbox-container').style.display = 'none';
   updateCartBadge();
-  // Reset CIO identity
+  updateInboxBadge();
   const cio = getCIO();
   if (cio && cio.reset) cio.reset();
   showToast('👋', 'Signed out', 'Session cleared');
   navigate('home');
 }
+
+// ─────────────────────────────────────────────
+// NOTIFICATION INBOX
+// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// NOTIFICATION INBOX — powered by Customer.io
+// ─────────────────────────────────────────────
+function initInbox() {
+  // Show the bell icon now that user is identified
+  document.getElementById('inbox-toggle-btn').style.display = 'flex';
+
+  // Register the inbox feed container with CIO's SDK
+  // CIO will render inbox messages into #cio-inbox-feed automatically
+  const cio = getCIO();
+  if (cio && cio.inbox) {
+    try {
+      cio.inbox.initialize({
+        containerId: 'cio-inbox-feed',
+        callbacks: {
+          onCountChange: function(count) {
+            const badge = document.getElementById('inbox-badge');
+            if (badge) {
+              badge.textContent = count;
+              badge.classList.toggle('visible', count > 0);
+            }
+          }
+        }
+      });
+    } catch(e) {
+      // SDK inbox not available in this version — fail silently
+    }
+  }
+}
+
+function toggleInbox() {
+  const el = document.getElementById('inbox-container');
+  const isOpen = el.style.display === 'block';
+  el.style.display = isOpen ? 'none' : 'block';
+  // Reset badge when opened
+  if (!isOpen) {
+    const badge = document.getElementById('inbox-badge');
+    if (badge) { badge.textContent = '0'; badge.classList.remove('visible'); }
+  }
+}
+
+// Close inbox when clicking outside
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('inbox-nav-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    const el = document.getElementById('inbox-container');
+    if (el) el.style.display = 'none';
+  }
+});
 
 function cioTrack(event, props) {
   showToast('⚡', event, props ? JSON.stringify(props).slice(0,80) : '');
@@ -2019,7 +2086,7 @@ function submitAuth() {
   });
 
   closeAuth();
-
+  initInbox();
   showToast('👤', state.authTab === 'signup' ? 'user_signed_up' : 'user_logged_in', email);
 }
 
