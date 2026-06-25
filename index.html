@@ -936,13 +936,18 @@
 <!-- CONFIG BANNER -->
 <div id="config-banner">
   <div class="cio-status">
-    <div class="dot" id="cio-dot"></div>
-    <span id="cio-status-text">Customer.io not connected</span>
+    <div class="dot connected" id="cio-dot"></div>
+    <span id="cio-status-text">Connected · Solutions demo</span>
+    <button onclick="toggleWorkspaceSwitcher()" id="switch-ws-btn" style="background:none;border:none;color:rgba(255,255,255,0.45);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;padding:0 0 0 8px;text-decoration:underline;text-underline-offset:2px;">Switch workspace</button>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-    <span class="label">Site ID:</span>
-    <input type="text" id="cio-site-id" placeholder="e.g. abc123xyz" />
-    <button onclick="initCIO()">Connect</button>
+  <div id="ws-switcher" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
+    <span style="color:rgba(255,255,255,0.5);font-size:12px;">Write key:</span>
+    <input type="text" id="ws-write-key" placeholder="Paste your Analytics.js write key" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);border-radius:var(--radius);color:#fff;padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:12px;width:260px;outline:none;"/>
+    <button onclick="switchWorkspace()" style="background:var(--sage);border:none;border-radius:var(--radius);color:#fff;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;">Connect</button>
+    <button onclick="resetWorkspace()" style="background:none;border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius);color:rgba(255,255,255,0.5);padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;">Reset to default</button>
+    <button onclick="toggleWorkspaceSwitcher()" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:16px;cursor:pointer;padding:0 4px;line-height:1;">×</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
     <button onclick="navigate('admin')" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius);color:rgba(255,255,255,0.6);padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;">⚙ Admin</button>
   </div>
 </div>
@@ -1403,80 +1408,117 @@ function plantSVG(plant, size = 'card') {
 // ─────────────────────────────────────────────
 // CUSTOMER.IO
 // ─────────────────────────────────────────────
-function initCIO() {
-  const siteId = document.getElementById('cio-site-id').value.trim();
-  if (!siteId) { showToast('⚠', 'No Site ID entered', 'Enter your Customer.io Site ID'); return; }
+// ─────────────────────────────────────────────
+// CUSTOMER.IO — Analytics.js (workspace-aware)
+// ─────────────────────────────────────────────
+const DEFAULT_WRITE_KEY = '3f3863a39ea3840479e9';
 
-  window._cio = window._cio || [];
-  (function() {
-    var a, b, c;
-    a = function(f) {
-      return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); };
-    };
-    b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
-    for (c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
-    var t = document.createElement('script');
-    var s = document.getElementsByTagName('script')[0];
-    t.async = true;
-    t.id = 'cio-tracker';
-    t.setAttribute('data-site-id', siteId);
-    t.setAttribute('data-use-array-params', 'true');
-    t.setAttribute('data-use-in-app', 'true');
-    t.src = 'https://assets.customer.io/assets/track.js';
-    s.parentNode.insertBefore(t, s);
-  })();
+function loadAnalyticsJS(writeKey) {
+  // Reset analytics if already loaded so we can reinitialise
+  if (window.analytics && window.analytics.initialized) {
+    window.analytics = undefined;
+  }
 
-  state.cioConnected = true;
+  !function(){
+    var analytics=window.analytics=window.analytics||[];
+    if(!analytics.initialize){
+      if(analytics.invoked){return;}
+      analytics.invoked=!0;
+      analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","screen","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware","registerIntegration","waitForUpdate"];
+      analytics.factory=function(e){return function(){if(window.analytics.initialized)return window.analytics[e].apply(window.analytics,arguments);var i=Array.prototype.slice.call(arguments);if(["track","screen","alias","group","page","identify"].indexOf(e)>-1){var c=document.querySelector("link[rel='canonical']");i.push({__t:"bpc",c:c&&c.getAttribute("href")||void 0,p:location.pathname,u:location.href,s:location.search,t:document.title,r:document.referrer});}i.unshift(e);analytics.push(i);return analytics;}};
+      for(var i=0;i<analytics.methods.length;i++){var key=analytics.methods[i];analytics[key]=analytics.factory(key);}
+      analytics.load=function(key,i){
+        var existing=document.getElementById('cio-analytics-js');
+        if(existing) existing.remove();
+        var t=document.createElement("script");
+        t.id='cio-analytics-js';
+        t.type="text/javascript";t.async=!0;
+        t.src="https://cdp.customer.io/v1/analytics-js/snippet/"+key+"/analytics.min.js";
+        var n=document.getElementsByTagName("script")[0];
+        n.parentNode.insertBefore(t,n);
+        analytics._writeKey=key;analytics._loadOptions=i;
+      };
+      analytics.SNIPPET_VERSION="5.0.1";
+      analytics.load(writeKey, {
+        integrations: { "Customer.io In-App Plugin": { siteId: writeKey } }
+      });
+    }
+  }();
+}
+
+// On load — use custom key from sessionStorage if set, else default
+const sessionKey = sessionStorage.getItem('folia_write_key');
+const activeWriteKey = sessionKey || DEFAULT_WRITE_KEY;
+loadAnalyticsJS(activeWriteKey);
+
+if (sessionKey) {
+  document.getElementById('cio-status-text').textContent = 'Connected · Custom workspace';
+}
+
+state.cioConnected = true;
+
+function toggleWorkspaceSwitcher() {
+  const el = document.getElementById('ws-switcher');
+  const isOpen = el.style.display === 'flex';
+  el.style.display = isOpen ? 'none' : 'flex';
+  if (!isOpen) {
+    document.getElementById('ws-write-key').focus();
+    const current = sessionStorage.getItem('folia_write_key') || '';
+    document.getElementById('ws-write-key').value = current;
+  }
+}
+
+function switchWorkspace() {
+  const key = document.getElementById('ws-write-key').value.trim();
+  if (!key) { showToast('⚠', 'No write key entered', 'Paste your Analytics.js write key'); return; }
+  sessionStorage.setItem('folia_write_key', key);
+  loadAnalyticsJS(key);
   document.getElementById('cio-dot').classList.add('connected');
-  document.getElementById('cio-status-text').textContent = `Connected · Site ${siteId}`;
-  showToast('✓', 'customer.io connected', `Site ID: ${siteId}`);
+  document.getElementById('cio-status-text').textContent = 'Connected · Custom workspace';
+  document.getElementById('ws-switcher').style.display = 'none';
+  showToast('✓', 'Workspace switched', key.slice(0,8) + '...');
+  cioPage('Home');
+}
+
+function resetWorkspace() {
+  sessionStorage.removeItem('folia_write_key');
+  loadAnalyticsJS(DEFAULT_WRITE_KEY);
+  document.getElementById('cio-status-text').textContent = 'Connected · Solutions demo';
+  document.getElementById('ws-write-key').value = '';
+  document.getElementById('ws-switcher').style.display = 'none';
+  showToast('✓', 'Reset to solutions demo', DEFAULT_WRITE_KEY.slice(0,8) + '...');
   cioPage('Home');
 }
 
 function cioTrack(event, props) {
   showToast('⚡', event, props ? JSON.stringify(props).slice(0,80) : '');
-  if (state.cioConnected && window._cio) {
-    _cio.track(event, props || {});
-  }
+  if (window.analytics) analytics.track(event, props || {});
 }
 
 function cioPage(name, props) {
   showToast('👁', 'page_viewed', name);
-  if (state.cioConnected && window._cio) {
-    _cio.page(name, props || {});
-  }
+  if (window.analytics) analytics.page(name, props || {});
 }
 
 function cioIdentify(attrs) {
   showToast('👤', 'identify', attrs.email);
-  if (state.cioConnected && window._cio) {
-    _cio.identify(attrs);
-  }
+  if (window.analytics) analytics.identify(attrs.id || attrs.email, attrs);
 }
 
-// Object relationship (saved plants)
 function cioObjectRelationship(action, plant) {
-  const payload = {
-    action: action,
-    object_type_id: '1',
-    object_id: plant.id,
-    attributes: {
-      name: plant.name,
-      genus: plant.genus,
-      price: plant.price,
-      care_level: plant.care,
-      collection: plant.collection
-    }
-  };
   showToast('🔗', action === 'add' ? 'object_relationship_created' : 'object_relationship_deleted', `Plant: ${plant.name}`);
-  if (state.cioConnected && window._cio) {
-    _cio.track(action === 'add' ? 'plant_saved' : 'plant_unsaved', {
+  if (window.analytics) {
+    analytics.track(action === 'add' ? 'plant_saved' : 'plant_unsaved', {
       plant_id: plant.id,
       plant_name: plant.name,
       object_type_id: '1'
     });
   }
 }
+
+function initCIO() {}
+
+
 
 // ─────────────────────────────────────────────
 // TOAST
