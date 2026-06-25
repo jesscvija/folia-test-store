@@ -7,17 +7,26 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
-  <!-- Customer.io track.js — solutions demo workspace (3f3863a39ea3840479e9) -->
-  <!-- Swapped out at runtime if a custom workspace key is set in localStorage -->
-  <script
-    id="cio-tracker"
-    data-site-id="3f3863a39ea3840479e9"
-    data-use-array-params="true"
-    data-use-in-app="true"
-    data-in-app-use-persistence="true"
-    src="https://assets.customer.io/assets/track.js"
-    async
-  ></script>
+  <!-- Customer.io track.js — solutions demo workspace -->
+  <script>
+    var _cio = _cio || [];
+    (function() {
+      var a, b, c;
+      a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
+      b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
+      for (c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
+      var t = document.createElement('script'),
+          s = document.getElementsByTagName('script')[0];
+      t.async = true;
+      t.id = 'cio-tracker';
+      t.setAttribute('data-site-id', '209cffe571eda204979b');
+      t.setAttribute('data-use-array-params', 'true');
+      t.setAttribute('data-use-in-app', 'true');
+      t.setAttribute('data-in-app-use-persistence', 'true');
+      t.src = 'https://assets.customer.io/assets/track.js';
+      s.parentNode.insertBefore(t, s);
+    })();
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1451,8 +1460,8 @@ function plantSVG(plant, size = 'card') {
 // ─────────────────────────────────────────────
 // CUSTOMER.IO — Analytics.js (workspace-aware)
 // ─────────────────────────────────────────────
-const DEFAULT_WRITE_KEY = '3f3863a39ea3840479e9';
-const DEFAULT_SITE_ID = '3f3863a39ea3840479e9';
+const DEFAULT_WRITE_KEY = '3f3863a39ea3840479e9'; // Analytics.js write key (for custom workspace comparison)
+const DEFAULT_SITE_ID = '209cffe571eda204979b'; // track.js site ID (solutions demo)
 
 let isDefaultWorkspace = true;
 
@@ -1500,13 +1509,16 @@ function loadAnalyticsJS(writeKey) {
   }();
 }
 
-// Stub _cio queue for track.js (already loaded in <head>)
+// _cio is initialized by track.js in <head> — just ensure the queue exists
+// in case our JS runs before track.js finishes loading
 window._cio = window._cio || [];
-(function() {
-  var a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
-  var b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
-  for (var c = 0; c < b.length; c++) { if (!_cio[b[c]]) _cio[b[c]] = a(b[c]); }
-})();
+if (!window._cio.identify) {
+  (function() {
+    var a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
+    var b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
+    for (var c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
+  })();
+}
 
 // Check if custom workspace is set — if so swap to Analytics.js
 const sessionKey = localStorage.getItem('folia_write_key');
