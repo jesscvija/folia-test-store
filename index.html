@@ -1969,21 +1969,43 @@ function renderCart() {
         <div class="cart-row total"><span>Total</span><span>$${cartTotal().toFixed(2)}</span></div>
       </div>
       <div class="checkout-form">
-        <label class="form-label">Email</label>
-        <input class="form-input" type="email" id="checkout-email" placeholder="your@email.com" value="${state.user?.email || ''}"/>
-        <div class="form-row">
-          <div>
-            <label class="form-label">First name</label>
-            <input class="form-input" type="text" id="checkout-first" placeholder="Jane"/>
+        ${state.user ? `
+          <div style="background:var(--sage-light);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--sage)">${state.user.name || state.user.email}</div>
+              <div style="font-size:12px;color:var(--ink-muted)">${state.user.email}</div>
+            </div>
+            <button onclick="logOut()" style="background:none;border:none;font-size:12px;color:var(--ink-faint);cursor:pointer;font-family:'DM Sans',sans-serif;">Not you?</button>
           </div>
-          <div>
-            <label class="form-label">Last name</label>
-            <input class="form-input" type="text" id="checkout-last" placeholder="Smith"/>
+          <input type="hidden" id="checkout-email" value="${state.user.email}"/>
+          <input type="hidden" id="checkout-first" value="${state.user.firstName || ''}"/>
+          <input type="hidden" id="checkout-last" value="${state.user.lastName || ''}"/>
+          <label class="form-label">Delivery address</label>
+          <input class="form-input" type="text" id="checkout-addr" placeholder="123 Plant St, City"/>
+          <button class="btn-primary" style="width:100%;margin-top:4px" onclick="placeOrder()">Place order · $${cartTotal().toFixed(2)}</button>
+        ` : `
+          <div style="text-align:center;padding:24px 0 20px;">
+            <div style="font-size:15px;font-weight:500;margin-bottom:8px">Sign in to complete your order</div>
+            <div style="font-size:13px;color:var(--ink-muted);margin-bottom:20px">We'll use your saved details to complete checkout.</div>
+            <button class="btn-primary" style="width:100%;margin-bottom:10px" onclick="openAuth()">Sign in or create account</button>
+            <div style="font-size:12px;color:var(--ink-faint)">Or continue as guest</div>
           </div>
-        </div>
-        <label class="form-label">Address</label>
-        <input class="form-input" type="text" id="checkout-addr" placeholder="123 Plant St, City"/>
-        <button class="btn-primary" style="width:100%;margin-top:4px" onclick="placeOrder()">Place order · $${cartTotal().toFixed(2)}</button>
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="checkout-email" placeholder="your@email.com"/>
+          <div class="form-row">
+            <div>
+              <label class="form-label">First name</label>
+              <input class="form-input" type="text" id="checkout-first" placeholder="Jane"/>
+            </div>
+            <div>
+              <label class="form-label">Last name</label>
+              <input class="form-input" type="text" id="checkout-last" placeholder="Smith"/>
+            </div>
+          </div>
+          <label class="form-label">Address</label>
+          <input class="form-input" type="text" id="checkout-addr" placeholder="123 Plant St, City"/>
+          <button class="btn-primary" style="width:100%;margin-top:4px" onclick="placeOrder()">Place order · $${cartTotal().toFixed(2)}</button>
+        `}
       </div>
     </div>`;
 }
