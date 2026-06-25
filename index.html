@@ -7,6 +7,26 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <script>
+    // Only load track.js if no custom workspace key is set
+    if (!localStorage.getItem('folia_write_key')) {
+      var _cio = _cio || [];
+      (function() {
+        var a, b, c;
+        a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
+        b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
+        for (c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
+        var t = document.createElement('script'),
+            s = document.getElementsByTagName('script')[0];
+        t.async = true;
+        t.setAttribute('data-site-id', '7488f1e71edc6a2961f9');
+        t.setAttribute('data-use-array-params', 'true');
+        t.setAttribute('data-use-in-app', 'true');
+        t.src = 'https://assets.customer.io/assets/track.js';
+        s.parentNode.insertBefore(t, s);
+      })();
+    }
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1328,23 +1348,6 @@ const DEFAULT_SITE_ID = '7488f1e71edc6a2961f9';
 
 let isDefaultWorkspace = true;
 
-function loadTrackJS(siteId) {
-  window._cio = window._cio || [];
-  (function() {
-    var a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
-    var b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
-    for (var c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
-    var t = document.createElement('script');
-    t.async = true;
-    t.setAttribute('data-site-id', siteId);
-    t.setAttribute('data-use-array-params', 'true');
-    t.setAttribute('data-use-in-app', 'true');
-    t.src = 'https://assets.customer.io/assets/track.js';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(t, s);
-  })();
-}
-
 function loadAnalyticsJS(writeKey) {
   if (window.cioanalytics && window.cioanalytics.initialized) window.cioanalytics = undefined;
   var existing = document.getElementById('cio-analytics-js');
@@ -1386,7 +1389,7 @@ if (sessionKey) {
   document.getElementById('cio-status-text').textContent = 'Connected · Custom workspace';
 } else {
   isDefaultWorkspace = true;
-  loadTrackJS(DEFAULT_SITE_ID);
+  // track.js already loaded from <head>
 }
 
 state.cioConnected = true;
