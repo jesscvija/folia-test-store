@@ -7,8 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
-  <script>var _cio = _cio || [];</script>
-  <script async data-site-id="7488f1e71edc6a2961f9" data-use-array-params="true" data-use-in-app="true" src="https://assets.customer.io/assets/track.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1326,22 +1324,11 @@ function plantSVG(plant, size = 'card') {
 // CUSTOMER.IO — Analytics.js (workspace-aware)
 // ─────────────────────────────────────────────
 const DEFAULT_WRITE_KEY = '3f3863a39ea3840479e9';
-const DEFAULT_SITE_ID = '7488f1e71edc6a2961f9';
-
-let isDefaultWorkspace = true;
-
-// Ensure _cio queue methods exist before track.js initializes
-window._cio = window._cio || [];
-if (!window._cio.identify) {
-  (function() {
-    var a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
-    var b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
-    for (var c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
-  })();
-}
 
 function loadAnalyticsJS(writeKey) {
-  if (window.cioanalytics && window.cioanalytics.initialized) window.cioanalytics = undefined;
+  if (window.cioanalytics && window.cioanalytics.initialized) {
+    window.cioanalytics = undefined;
+  }
   var existing = document.getElementById('cio-analytics-js');
   if (existing) existing.remove();
 
@@ -1366,7 +1353,9 @@ function loadAnalyticsJS(writeKey) {
       analytics.SNIPPET_VERSION="4.15.3";
       analytics.load(writeKey, {
         integrations: {
-          "Customer.io In-App Plugin": { anonymousInApp: true }
+          "Customer.io In-App Plugin": {
+            anonymousInApp: true
+          }
         }
       });
       analytics.page();
@@ -1375,15 +1364,10 @@ function loadAnalyticsJS(writeKey) {
 }
 
 const sessionKey = localStorage.getItem('folia_write_key');
+loadAnalyticsJS(sessionKey || DEFAULT_WRITE_KEY);
+
 if (sessionKey) {
-  isDefaultWorkspace = false;
-  // Neutralize _cio so track.js events go nowhere
-  window._cio = { identify: function(){}, track: function(){}, page: function(){}, sidentify: function(){}, on: function(){}, off: function(){} };
-  loadAnalyticsJS(sessionKey);
   document.getElementById('cio-status-text').textContent = 'Connected · Custom workspace';
-} else {
-  isDefaultWorkspace = true;
-  // track.js loaded from <head> — already queuing calls via _cio
 }
 
 state.cioConnected = true;
@@ -1437,26 +1421,22 @@ function logOut() {
   document.getElementById('nav-user-label').textContent = 'Sign in';
   document.getElementById('user-menu').style.display = 'none';
   updateCartBadge();
-  if (isDefaultWorkspace && window._cio && _cio.reset) { _cio.reset(); }
-  else if (!isDefaultWorkspace && window.cioanalytics && cioanalytics.reset) { cioanalytics.reset(); }
+  if (window.cioanalytics && cioanalytics.reset) cioanalytics.reset();
   showToast('👋', 'Signed out', 'Session cleared');
   navigate('home');
 }
 
 // ─────────────────────────────────────────────
 function cioTrack(event, props) {
-  if (isDefaultWorkspace && window._cio) { _cio.track(event, props || {}); }
-  else if (!isDefaultWorkspace && window.cioanalytics) { cioanalytics.track(event, props || {}); }
+  if (window.cioanalytics) cioanalytics.track(event, props || {});
 }
 
 function cioPage(name, props) {
-  if (isDefaultWorkspace && window._cio) { _cio.page(name, props || {}); }
-  else if (!isDefaultWorkspace && window.cioanalytics) { cioanalytics.page(name, props || {}); }
+  if (window.cioanalytics) cioanalytics.page(name, props || {});
 }
 
 function cioIdentify(attrs) {
-  if (isDefaultWorkspace && window._cio) { _cio.identify(attrs); }
-  else if (!isDefaultWorkspace && window.cioanalytics) { cioanalytics.identify(attrs.id || attrs.email, attrs); }
+  if (window.cioanalytics) cioanalytics.identify(attrs.id || attrs.email, attrs);
 }
 
 function cioObjectRelationship(action, plant) {
