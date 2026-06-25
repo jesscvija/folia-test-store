@@ -693,6 +693,231 @@
     }
     footer span { color: var(--sage); font-style: italic; font-family: 'DM Serif Display', serif; font-size: 15px; }
 
+    /* ── ADMIN PANEL ── */
+    .admin-layout {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 40px 80px;
+    }
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+    }
+    .admin-badge {
+      background: var(--terracotta-light);
+      color: var(--terracotta);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 2px;
+    }
+    .admin-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+    .admin-tab {
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500;
+      padding: 10px 0; margin-right: 28px;
+      color: var(--ink-muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .admin-tab.active { color: var(--sage); border-bottom-color: var(--sage); }
+    .admin-section { display: none; }
+    .admin-section.active { display: block; }
+    .admin-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .admin-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .admin-card-title { font-weight: 500; font-size: 15px; }
+    .admin-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .admin-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .admin-field { margin-bottom: 0; }
+    .admin-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      display: block;
+      margin-bottom: 5px;
+    }
+    .admin-input {
+      width: 100%;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .admin-input:focus { border-color: var(--sage); background: var(--white); }
+    .admin-textarea {
+      width: 100%;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      outline: none;
+      resize: vertical;
+      min-height: 72px;
+      transition: border-color 0.15s;
+    }
+    .admin-textarea:focus { border-color: var(--sage); background: var(--white); }
+    .admin-select {
+      width: 100%;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      outline: none;
+      cursor: pointer;
+    }
+    .btn-danger {
+      background: transparent;
+      color: var(--terracotta);
+      border: 1px solid rgba(196,97,58,0.3);
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-danger:hover { background: var(--terracotta-light); }
+    .btn-sm {
+      background: var(--sage);
+      color: #fff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-sm:hover { background: #3a5434; }
+    .btn-sm-outline {
+      background: transparent;
+      color: var(--ink-muted);
+      border: 1px solid var(--border-strong);
+      padding: 7px 14px;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-sm-outline:hover { background: var(--cream); color: var(--ink); }
+    .admin-save-bar {
+      position: sticky;
+      bottom: 0;
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 32px -40px -80px;
+    }
+    .save-bar-hint { font-size: 13px; color: var(--ink-muted); }
+    .admin-event-row {
+      display: grid;
+      grid-template-columns: 200px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-event-row:last-child { border-bottom: none; }
+    .event-original { font-size: 12px; font-family: monospace; color: var(--ink-faint); }
+    .toggle-wrap { display: flex; align-items: center; gap: 8px; }
+    .toggle {
+      width: 36px; height: 20px;
+      background: var(--border-strong);
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+      border: none;
+      flex-shrink: 0;
+    }
+    .toggle.on { background: var(--sage); }
+    .toggle::after {
+      content: '';
+      width: 14px; height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      top: 3px; left: 3px;
+      transition: transform 0.2s;
+    }
+    .toggle.on::after { transform: translateX(16px); }
+    .admin-pin-screen {
+      max-width: 380px;
+      margin: 100px auto;
+      padding: 0 40px;
+      text-align: center;
+    }
+    .admin-pin-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .admin-pin-subtitle { color: var(--ink-muted); font-size: 14px; margin-bottom: 28px; font-weight: 300; }
+    .pin-inputs { display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; }
+    .pin-input {
+      width: 52px; height: 56px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 500;
+      background: var(--white);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      outline: none;
+    }
+    .pin-input:focus { border-color: var(--sage); }
+    .pin-error { color: var(--terracotta); font-size: 13px; margin-top: -12px; margin-bottom: 16px; min-height: 20px; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       .hero { grid-template-columns: 1fr; padding: 40px 20px 48px; gap: 40px; }
@@ -718,6 +943,7 @@
     <span class="label">Site ID:</span>
     <input type="text" id="cio-site-id" placeholder="e.g. abc123xyz" />
     <button onclick="initCIO()">Connect</button>
+    <button onclick="navigate('admin')" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius);color:rgba(255,255,255,0.6);padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;">⚙ Admin</button>
   </div>
 </div>
 
@@ -829,7 +1055,130 @@
   <div class="confirm-layout" id="confirm-content"></div>
 </div>
 
-<!-- AUTH MODAL -->
+<!-- ADMIN PAGE -->
+<div id="page-admin" class="page">
+  <!-- PIN SCREEN -->
+  <div id="admin-pin-screen" class="admin-pin-screen">
+    <div style="font-size:36px;margin-bottom:16px">🔒</div>
+    <h2 class="admin-pin-title">Admin panel</h2>
+    <p class="admin-pin-subtitle">Enter the 4-digit PIN to access store settings.<br>Default PIN is <strong>1234</strong>.</p>
+    <div class="pin-inputs">
+      <input class="pin-input" type="password" maxlength="1" id="pin-0" oninput="pinInput(0)" onkeydown="pinKey(event,0)" inputmode="numeric"/>
+      <input class="pin-input" type="password" maxlength="1" id="pin-1" oninput="pinInput(1)" onkeydown="pinKey(event,1)" inputmode="numeric"/>
+      <input class="pin-input" type="password" maxlength="1" id="pin-2" oninput="pinInput(2)" onkeydown="pinKey(event,2)" inputmode="numeric"/>
+      <input class="pin-input" type="password" maxlength="1" id="pin-3" oninput="pinInput(3)" onkeydown="pinKey(event,3)" inputmode="numeric"/>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <button class="btn-sm-outline" onclick="navigate('home')">← Back to store</button>
+  </div>
+
+  <!-- ADMIN CONTENT (hidden until PIN entered) -->
+  <div id="admin-content" style="display:none">
+    <div class="admin-layout">
+      <div class="admin-header">
+        <div>
+          <h1 class="admin-title">Store admin</h1>
+          <p style="font-size:13px;color:var(--ink-muted);margin-top:4px">Changes save to your browser and apply instantly to the store.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="admin-badge">Internal only</span>
+          <button class="btn-sm-outline" onclick="navigate('home')">← View store</button>
+        </div>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchAdminTab('products')">Products</button>
+        <button class="admin-tab" onclick="switchAdminTab('events')">Events</button>
+        <button class="admin-tab" onclick="switchAdminTab('messages')">In-app messages</button>
+        <button class="admin-tab" onclick="switchAdminTab('settings')">Settings</button>
+      </div>
+
+      <!-- PRODUCTS TAB -->
+      <div id="admin-products" class="admin-section active">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button class="btn-sm" onclick="addAdminProduct()">+ Add product</button>
+        </div>
+        <div id="admin-product-list"></div>
+      </div>
+
+      <!-- EVENTS TAB -->
+      <div id="admin-events" class="admin-section">
+        <div class="admin-card" style="margin-bottom:24px">
+          <p style="font-size:13px;color:var(--ink-muted);line-height:1.6">Rename events to match your Customer.io workspace naming conventions, or disable events you don't want fired. Changes apply immediately — no redeploy needed.</p>
+        </div>
+        <div id="admin-event-list"></div>
+        <div style="margin-top:16px;display:flex;justify-content:flex-end">
+          <button class="btn-sm" onclick="saveEvents()">Save event settings</button>
+        </div>
+      </div>
+
+      <!-- MESSAGES TAB -->
+      <div id="admin-messages" class="admin-section">
+        <div class="admin-card" style="margin-bottom:24px">
+          <p style="font-size:13px;color:var(--ink-muted);line-height:1.6">Edit the simulated in-app messages that appear in the store. These mimic what a real Customer.io in-app message looks like. Use them to show teammates what in-app messaging can look like for this use case.</p>
+        </div>
+        <div id="admin-message-list"></div>
+        <div style="margin-top:16px;display:flex;justify-content:flex-end">
+          <button class="btn-sm" onclick="saveMessages()">Save messages</button>
+        </div>
+      </div>
+
+      <!-- SETTINGS TAB -->
+      <div id="admin-settings" class="admin-section">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">Store details</div>
+          </div>
+          <div class="admin-grid-2" style="margin-bottom:12px">
+            <div class="admin-field">
+              <label class="admin-label">Store name</label>
+              <input class="admin-input" id="setting-store-name" type="text" placeholder="Folia"/>
+            </div>
+            <div class="admin-field">
+              <label class="admin-label">Store tagline</label>
+              <input class="admin-input" id="setting-tagline" type="text" placeholder="Rare & Exotic Plants"/>
+            </div>
+          </div>
+          <div class="admin-field">
+            <label class="admin-label">Hero headline</label>
+            <input class="admin-input" id="setting-headline" type="text" placeholder="Plants that make a room breathe"/>
+          </div>
+        </div>
+
+        <div class="admin-card" style="margin-top:16px">
+          <div class="admin-card-header">
+            <div class="admin-card-title">Cart abandonment timer</div>
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label class="admin-label">Fire after (seconds)</label>
+              <input class="admin-input" id="setting-abandon-timer" type="number" min="5" max="300" placeholder="30"/>
+            </div>
+            <div class="admin-field">
+              <label class="admin-label">Admin PIN</label>
+              <input class="admin-input" id="setting-pin" type="text" maxlength="4" placeholder="1234"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card" style="margin-top:16px">
+          <div class="admin-card-header">
+            <div class="admin-card-title">Reset</div>
+          </div>
+          <p style="font-size:13px;color:var(--ink-muted);margin-bottom:14px">Clear all admin customisations and restore the default store settings.</p>
+          <button class="btn-danger" onclick="resetAdminSettings()">Reset to defaults</button>
+        </div>
+
+        <div style="margin-top:16px;display:flex;justify-content:flex-end">
+          <button class="btn-sm" onclick="saveSettings()">Save settings</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 <div class="modal-backdrop" id="auth-modal">
   <div class="modal">
     <button class="modal-close" onclick="closeAuth()">×</button>
@@ -1579,9 +1928,435 @@ function closeIAB() {
 }
 
 // ─────────────────────────────────────────────
+// ADMIN — PERSISTENCE
+// ─────────────────────────────────────────────
+function adminLoad(key, fallback) {
+  try { const v = localStorage.getItem('folia_' + key); return v ? JSON.parse(v) : fallback; } catch(e) { return fallback; }
+}
+function adminSave(key, val) {
+  try { localStorage.setItem('folia_' + key, JSON.stringify(val)); } catch(e) {}
+}
+
+// Load persisted overrides on startup
+let adminSettings = adminLoad('settings', {
+  storeName: 'Folia',
+  tagline: 'Rare & Exotic Plants',
+  headline: 'Plants that make a room <em>breathe</em>',
+  abandonTimer: 30,
+  pin: '1234'
+});
+
+let adminEvents = adminLoad('events', null);
+let adminMessages = adminLoad('messages', null);
+
+// Merge persisted plant edits into PLANTS array
+const savedPlants = adminLoad('plants', null);
+if (savedPlants) {
+  savedPlants.forEach(saved => {
+    const idx = PLANTS.findIndex(p => p.id === saved.id);
+    if (idx !== -1) Object.assign(PLANTS[idx], saved);
+    else PLANTS.push(saved);
+  });
+}
+
+// Default event config
+const DEFAULT_EVENTS = [
+  { key: 'page_viewed',               label: 'Page viewed',               enabled: true  },
+  { key: 'product_viewed',            label: 'Product viewed',            enabled: true  },
+  { key: 'product_added_to_cart',     label: 'Product added to cart',     enabled: true  },
+  { key: 'product_removed_from_cart', label: 'Product removed from cart', enabled: true  },
+  { key: 'cart_abandoned',            label: 'Cart abandoned',            enabled: true  },
+  { key: 'order_completed',           label: 'Order completed',           enabled: true  },
+  { key: 'user_signed_up',            label: 'User signed up',            enabled: true  },
+  { key: 'user_logged_in',            label: 'User logged in',            enabled: true  },
+  { key: 'plant_saved',               label: 'Plant saved',               enabled: true  },
+  { key: 'plant_unsaved',             label: 'Plant unsaved',             enabled: true  },
+  { key: 'in_app_message_shown',      label: 'In-app message shown',      enabled: true  },
+  { key: 'in_app_message_dismissed',  label: 'In-app message dismissed',  enabled: true  },
+  { key: 'care_reminders_enabled',    label: 'Care reminders enabled',    enabled: true  },
+];
+let eventConfig = adminEvents || DEFAULT_EVENTS.map(e => ({...e}));
+
+// Default IAB messages
+const DEFAULT_MESSAGES = [
+  {
+    id: 'cart',
+    trigger: 'Cart page viewed (with items)',
+    tag: 'Folia',
+    title: 'Your cart is ready',
+    body: 'You have items in your cart. Ready to complete your order?',
+    action: 'Complete order',
+    enabled: true
+  },
+  {
+    id: 'post_purchase',
+    trigger: 'After order confirmation',
+    tag: 'Care reminder',
+    title: 'Set up care reminders',
+    body: 'Get weekly watering reminders and repotting alerts for your new plants.',
+    action: 'Enable reminders',
+    enabled: true
+  }
+];
+let messageConfig = adminMessages || DEFAULT_MESSAGES.map(m => ({...m}));
+
+// Override cioTrack to respect event enabled/disabled
+const _origCioTrack = cioTrack;
+function cioTrackChecked(event, props) {
+  const cfg = eventConfig.find(e => e.key === event || e.customName === event);
+  if (cfg && !cfg.enabled) { showToast('⛔', event + ' (disabled)', ''); return; }
+  const name = (cfg && cfg.customName) ? cfg.customName : event;
+  _origCioTrack(name, props);
+}
+// Replace all cioTrack calls dynamically
+window.cioTrackActive = cioTrackChecked;
+
+// Apply store settings to DOM
+function applySettings() {
+  document.title = (adminSettings.storeName || 'Folia') + ' — ' + (adminSettings.tagline || 'Rare & Exotic Plants');
+  const heroH = document.querySelector('.hero-title');
+  if (heroH) heroH.innerHTML = adminSettings.headline || 'Plants that make a room <em>breathe</em>';
+}
+
+// ─────────────────────────────────────────────
+// ADMIN — PIN
+// ─────────────────────────────────────────────
+let adminUnlocked = false;
+
+function pinInput(idx) {
+  const val = document.getElementById('pin-' + idx).value;
+  if (val && idx < 3) document.getElementById('pin-' + (idx+1)).focus();
+  if (idx === 3) checkPin();
+}
+function pinKey(e, idx) {
+  if (e.key === 'Backspace' && !document.getElementById('pin-' + idx).value && idx > 0) {
+    document.getElementById('pin-' + (idx-1)).focus();
+  }
+}
+function checkPin() {
+  const entered = [0,1,2,3].map(i => document.getElementById('pin-' + i).value).join('');
+  const correct = adminSettings.pin || '1234';
+  if (entered === correct) {
+    adminUnlocked = true;
+    document.getElementById('admin-pin-screen').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+    renderAdminProducts();
+    renderAdminEvents();
+    renderAdminMessages();
+    populateAdminSettings();
+  } else {
+    document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
+    [0,1,2,3].forEach(i => { document.getElementById('pin-' + i).value = ''; });
+    document.getElementById('pin-0').focus();
+    setTimeout(() => document.getElementById('pin-error').textContent = '', 2000);
+  }
+}
+
+// ─────────────────────────────────────────────
+// ADMIN — TAB SWITCHING
+// ─────────────────────────────────────────────
+function switchAdminTab(tab) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('admin-' + tab).classList.add('active');
+}
+
+// ─────────────────────────────────────────────
+// ADMIN — PRODUCTS
+// ─────────────────────────────────────────────
+function renderAdminProducts() {
+  const el = document.getElementById('admin-product-list');
+  el.innerHTML = PLANTS.map((p, idx) => `
+    <div class="admin-card" id="admin-plant-${p.id}">
+      <div class="admin-card-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">${p.emoji}</span>
+          <div class="admin-card-title">${p.name}</div>
+          <span style="font-size:11px;color:var(--ink-faint);font-style:italic">${p.genus}</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm" onclick="saveProduct('${p.id}')">Save</button>
+          <button class="btn-danger" onclick="deleteProduct('${p.id}')">Delete</button>
+        </div>
+      </div>
+      <div class="admin-grid-3" style="margin-bottom:12px">
+        <div class="admin-field">
+          <label class="admin-label">Name</label>
+          <input class="admin-input" id="ap-name-${p.id}" type="text" value="${p.name}"/>
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">Genus (italic)</label>
+          <input class="admin-input" id="ap-genus-${p.id}" type="text" value="${p.genus}"/>
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">Price ($)</label>
+          <input class="admin-input" id="ap-price-${p.id}" type="number" value="${p.price}"/>
+        </div>
+      </div>
+      <div class="admin-grid-3" style="margin-bottom:12px">
+        <div class="admin-field">
+          <label class="admin-label">Care level</label>
+          <select class="admin-select" id="ap-care-${p.id}">
+            <option value="easy" ${p.care==='easy'?'selected':''}>Easy</option>
+            <option value="moderate" ${p.care==='moderate'?'selected':''}>Moderate</option>
+            <option value="tricky" ${p.care==='tricky'?'selected':''}>Tricky</option>
+          </select>
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">Collection</label>
+          <select class="admin-select" id="ap-collection-${p.id}">
+            <option value="easy" ${p.collection==='easy'?'selected':''}>Easy care</option>
+            <option value="statement" ${p.collection==='statement'?'selected':''}>Statement</option>
+          </select>
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">Badge</label>
+          <select class="admin-select" id="ap-badge-${p.id}">
+            <option value="" ${!p.badge?'selected':''}>None</option>
+            <option value="new" ${p.badge==='new'?'selected':''}>New</option>
+            <option value="rare" ${p.badge==='rare'?'selected':''}>Rare</option>
+          </select>
+        </div>
+      </div>
+      <div class="admin-field">
+        <label class="admin-label">Description</label>
+        <textarea class="admin-textarea" id="ap-desc-${p.id}">${p.desc}</textarea>
+      </div>
+    </div>`).join('');
+}
+
+function saveProduct(plantId) {
+  const p = PLANTS.find(pl => pl.id === plantId);
+  if (!p) return;
+  p.name    = document.getElementById('ap-name-' + plantId).value.trim() || p.name;
+  p.genus   = document.getElementById('ap-genus-' + plantId).value.trim() || p.genus;
+  p.price   = parseFloat(document.getElementById('ap-price-' + plantId).value) || p.price;
+  p.care    = document.getElementById('ap-care-' + plantId).value;
+  p.collection = document.getElementById('ap-collection-' + plantId).value;
+  p.badge   = document.getElementById('ap-badge-' + plantId).value || null;
+  p.desc    = document.getElementById('ap-desc-' + plantId).value.trim() || p.desc;
+  adminSave('plants', PLANTS);
+  showToast('✓', 'Product saved', p.name);
+}
+
+function deleteProduct(plantId) {
+  if (!confirm('Delete this product from the store?')) return;
+  const idx = PLANTS.findIndex(p => p.id === plantId);
+  if (idx !== -1) PLANTS.splice(idx, 1);
+  adminSave('plants', PLANTS);
+  renderAdminProducts();
+  showToast('🗑', 'Product deleted', plantId);
+}
+
+function addAdminProduct() {
+  const id = 'plant-' + Date.now();
+  PLANTS.push({
+    id,
+    name: 'New plant',
+    genus: 'Species name',
+    price: 40,
+    badge: null,
+    collection: 'easy',
+    care: 'easy',
+    light: 'Bright indirect',
+    water: 'Weekly',
+    humidity: 'Medium',
+    tags: ['New'],
+    desc: 'Add a description for this plant.',
+    color: '#D8ECD8',
+    accent: '#2B6B2B',
+    emoji: '🌱'
+  });
+  adminSave('plants', PLANTS);
+  renderAdminProducts();
+  document.getElementById('admin-plant-' + id).scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─────────────────────────────────────────────
+// ADMIN — EVENTS
+// ─────────────────────────────────────────────
+function renderAdminEvents() {
+  const el = document.getElementById('admin-event-list');
+  el.innerHTML = `<div class="admin-card">` +
+    eventConfig.map((ev, i) => `
+      <div class="admin-event-row">
+        <div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:2px">${ev.label}</div>
+          <div class="event-original">${ev.key}</div>
+        </div>
+        <div class="admin-field">
+          <input class="admin-input" id="ev-name-${i}" type="text" value="${ev.customName || ev.key}" placeholder="${ev.key}"/>
+        </div>
+        <button class="toggle ${ev.enabled ? 'on' : ''}" id="ev-toggle-${i}" onclick="toggleEvent(${i})" title="${ev.enabled ? 'Disable' : 'Enable'}"></button>
+      </div>`).join('') +
+  `</div>`;
+}
+
+function toggleEvent(i) {
+  eventConfig[i].enabled = !eventConfig[i].enabled;
+  const btn = document.getElementById('ev-toggle-' + i);
+  btn.classList.toggle('on', eventConfig[i].enabled);
+}
+
+function saveEvents() {
+  eventConfig.forEach((ev, i) => {
+    const custom = document.getElementById('ev-name-' + i)?.value.trim();
+    ev.customName = (custom && custom !== ev.key) ? custom : undefined;
+  });
+  adminSave('events', eventConfig);
+  showToast('✓', 'Event settings saved', eventConfig.filter(e=>e.enabled).length + ' events active');
+}
+
+// ─────────────────────────────────────────────
+// ADMIN — MESSAGES
+// ─────────────────────────────────────────────
+function renderAdminMessages() {
+  const el = document.getElementById('admin-message-list');
+  el.innerHTML = messageConfig.map((msg, i) => `
+    <div class="admin-card" style="margin-bottom:16px">
+      <div class="admin-card-header">
+        <div>
+          <div class="admin-card-title">${msg.id === 'cart' ? 'Cart message' : 'Post-purchase message'}</div>
+          <div style="font-size:12px;color:var(--ink-faint);margin-top:2px">Trigger: ${msg.trigger}</div>
+        </div>
+        <button class="toggle ${msg.enabled ? 'on' : ''}" id="msg-toggle-${i}" onclick="toggleMessage(${i})"></button>
+      </div>
+      <div class="admin-grid-2" style="margin-bottom:12px">
+        <div class="admin-field">
+          <label class="admin-label">Tag / label</label>
+          <input class="admin-input" id="msg-tag-${i}" type="text" value="${msg.tag}"/>
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">Button text</label>
+          <input class="admin-input" id="msg-action-${i}" type="text" value="${msg.action}"/>
+        </div>
+      </div>
+      <div class="admin-field" style="margin-bottom:12px">
+        <label class="admin-label">Title</label>
+        <input class="admin-input" id="msg-title-${i}" type="text" value="${msg.title}"/>
+      </div>
+      <div class="admin-field">
+        <label class="admin-label">Body copy</label>
+        <textarea class="admin-textarea" id="msg-body-${i}">${msg.body}</textarea>
+      </div>
+    </div>`).join('');
+}
+
+function toggleMessage(i) {
+  messageConfig[i].enabled = !messageConfig[i].enabled;
+  document.getElementById('msg-toggle-' + i).classList.toggle('on', messageConfig[i].enabled);
+}
+
+function saveMessages() {
+  messageConfig.forEach((msg, i) => {
+    msg.tag    = document.getElementById('msg-tag-' + i)?.value.trim() || msg.tag;
+    msg.title  = document.getElementById('msg-title-' + i)?.value.trim() || msg.title;
+    msg.body   = document.getElementById('msg-body-' + i)?.value.trim() || msg.body;
+    msg.action = document.getElementById('msg-action-' + i)?.value.trim() || msg.action;
+  });
+  adminSave('messages', messageConfig);
+  showToast('✓', 'Messages saved', '');
+}
+
+// ─────────────────────────────────────────────
+// ADMIN — SETTINGS
+// ─────────────────────────────────────────────
+function populateAdminSettings() {
+  document.getElementById('setting-store-name').value  = adminSettings.storeName || 'Folia';
+  document.getElementById('setting-tagline').value     = adminSettings.tagline || 'Rare & Exotic Plants';
+  document.getElementById('setting-headline').value    = (adminSettings.headline || 'Plants that make a room <em>breathe</em>').replace(/<em>/g,'').replace(/<\/em>/g,'');
+  document.getElementById('setting-abandon-timer').value = adminSettings.abandonTimer || 30;
+  document.getElementById('setting-pin').value         = adminSettings.pin || '1234';
+}
+
+function saveSettings() {
+  adminSettings.storeName    = document.getElementById('setting-store-name').value.trim() || 'Folia';
+  adminSettings.tagline      = document.getElementById('setting-tagline').value.trim();
+  adminSettings.headline     = document.getElementById('setting-headline').value.trim();
+  adminSettings.abandonTimer = parseInt(document.getElementById('setting-abandon-timer').value) || 30;
+  adminSettings.pin          = document.getElementById('setting-pin').value || '1234';
+  adminSave('settings', adminSettings);
+  applySettings();
+  showToast('✓', 'Settings saved', adminSettings.storeName);
+}
+
+function resetAdminSettings() {
+  if (!confirm('Reset all admin settings to defaults? This cannot be undone.')) return;
+  ['settings','plants','events','messages'].forEach(k => localStorage.removeItem('folia_' + k));
+  location.reload();
+}
+
+// ─────────────────────────────────────────────
+// OVERRIDE IAB to use messageConfig
+// ─────────────────────────────────────────────
+function getMessageConfig(id) {
+  return messageConfig.find(m => m.id === id) || null;
+}
+
+// Patch triggerCartIAB and triggerPostPurchaseIAB to use config
+function triggerCartIAB() {
+  const msg = getMessageConfig('cart');
+  if (cartCount() > 0 && !iabShown['cart'] && msg && msg.enabled) {
+    iabShown['cart'] = true;
+    setTimeout(() => {
+      document.getElementById('iab-tag').textContent    = msg.tag;
+      document.getElementById('iab-title').textContent  = msg.title;
+      document.getElementById('iab-body').textContent   = msg.body;
+      document.getElementById('iab-action').textContent = msg.action;
+      document.getElementById('iab-action').onclick = () => { navigate('cart'); closeIAB(); };
+      document.getElementById('in-app-msg').classList.add('show');
+      cioTrack('in_app_message_shown', { trigger: 'cart_viewed', cart_value: cartTotal() });
+    }, 1500);
+  }
+}
+
+function triggerPostPurchaseIAB() {
+  const msg = getMessageConfig('post_purchase');
+  if (!msg || !msg.enabled) return;
+  setTimeout(() => {
+    document.getElementById('iab-tag').textContent    = msg.tag;
+    document.getElementById('iab-title').textContent  = msg.title;
+    document.getElementById('iab-body').textContent   = msg.body;
+    document.getElementById('iab-action').textContent = msg.action;
+    document.getElementById('iab-action').onclick = () => {
+      cioTrack('care_reminders_enabled', { source: 'post_purchase_iab' });
+      closeIAB();
+    };
+    document.getElementById('in-app-msg').classList.add('show');
+    cioTrack('in_app_message_shown', { trigger: 'post_purchase' });
+  }, 2000);
+}
+
+// ─────────────────────────────────────────────
+// PATCH NAVIGATE for admin
+// ─────────────────────────────────────────────
+const _origNavigate = navigate;
+function navigate(page, plantId) {
+  if (page === 'admin') {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-admin').classList.add('active');
+    state.currentPage = 'admin';
+    window.scrollTo(0,0);
+    if (!adminUnlocked) {
+      document.getElementById('admin-pin-screen').style.display = 'block';
+      document.getElementById('admin-content').style.display = 'none';
+      setTimeout(() => document.getElementById('pin-0').focus(), 100);
+    }
+    return;
+  }
+  _origNavigate(page, plantId);
+}
+
+// Apply persisted settings on load
+applySettings();
+
+// ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
 renderHome();
+
+
 </script>
 </body>
 </html>
