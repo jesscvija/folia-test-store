@@ -1583,13 +1583,15 @@ function showToast(icon, name, detail) {
 // ─────────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────────
-function navigate(page, plantId) {
+function pushHash(hash) {
+  try { history.pushState(null, '', hash); } catch(e) {}
+}
   if (page === 'admin') {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-admin').classList.add('active');
     state.currentPage = 'admin';
     window.scrollTo(0, 0);
-    history.pushState(null, '', '#admin');
+    pushHash('#admin');
     if (!adminUnlocked) {
       document.getElementById('admin-pin-screen').style.display = 'block';
       document.getElementById('admin-content').style.display = 'none';
@@ -1605,11 +1607,11 @@ function navigate(page, plantId) {
 
   // Update URL hash
   if (page === 'detail' && plantId) {
-    history.pushState(null, '', '#product-' + plantId);
+    pushHash('#product-' + plantId);
   } else if (page === 'home') {
-    history.pushState(null, '', '/');
+    pushHash('/');
   } else {
-    history.pushState(null, '', '#' + page);
+    pushHash('#' + page);
   }
 
   if (page === 'home') { renderHome(); cioPage('Home'); }
