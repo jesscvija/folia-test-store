@@ -1580,16 +1580,31 @@ function initInbox() {
   // Bell only shows on default solutions demo workspace
   if (!isDefaultWorkspace) return;
   document.getElementById('inbox-toggle-btn').style.display = 'flex';
+}
 
-  // Listen for inbox messages via the in-app plugin event
-  window.addEventListener('message', function(e) {
-    try {
-      const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
-      if (data && data.type === 'cio:inbox:message' && data.payload) {
-        addInboxMessage(data.payload.title || 'New notification', data.payload.body || '');
-      }
-    } catch(err) {}
-  });
+async function fetchInboxMessages(email) {
+  if (!isDefaultWorkspace || !email) return;
+  try {
+    const res = await fetch(`/api/inbox?email=${encodeURIComponent(email)}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.messages && data.messages.length) {
+      data.messages.forEach(m => {
+        // Avoid duplicates
+        if (!state.inboxMessages.find(existing => existing.id === m.id)) {
+          state.inboxMessages.unshift({
+            id: m.id,
+            title: m.title,
+            body: m.body,
+            read: false,
+            time: m.sent_at ? new Date(m.sent_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+          });
+        }
+      });
+      updateInboxBadge();
+      renderInboxFeed();
+    }
+  } catch(e) {}
 }
 
 function toggleInbox() {
@@ -1597,10 +1612,10 @@ function toggleInbox() {
   const isOpen = el.style.display === 'block';
   el.style.display = isOpen ? 'none' : 'block';
   if (!isOpen) {
-    // Mark all read
     state.inboxMessages.forEach(m => m.read = true);
     updateInboxBadge();
     renderInboxFeed();
+    if (state.user) fetchInboxMessages(state.user.email);
   }
 }
 
@@ -2007,6 +2022,8 @@ function placeOrder() {
   renderConfirmation(orderId, items, total, email);
   navigate('confirmation');
   triggerPostPurchaseIAB();
+  // Fetch inbox after a short delay so CIO has time to send the message
+  setTimeout(() => fetchInboxMessages(email), 4000);
 }
 
 function renderConfirmation(orderId, items, total, email) {
@@ -2120,6 +2137,7 @@ function submitAuth() {
 
   closeAuth();
   initInbox();
+  fetchInboxMessages(email);
   showToast('👤', state.authTab === 'signup' ? 'user_signed_up' : 'user_logged_in', email);
 }
 
