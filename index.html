@@ -1520,7 +1520,12 @@ if (sessionKey) {
   document.getElementById('cio-status-text').textContent = 'Connected · Custom workspace';
 } else {
   isDefaultWorkspace = true;
-  loadTrackJS(DEFAULT_SITE_ID);
+  // Defer track.js load until DOM is fully ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { loadTrackJS(DEFAULT_SITE_ID); });
+  } else {
+    loadTrackJS(DEFAULT_SITE_ID);
+  }
 }
 
 state.cioConnected = true;
