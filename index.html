@@ -1451,27 +1451,29 @@ function getCIO() {
 }
 
 function loadTrackJS(siteId) {
-  // Legacy track.js — supports inbox, in-app, identify
-  window._cio = window._cio || [];
   var existing = document.getElementById('cio-tracker-js');
   if (existing) existing.remove();
 
-  (function() {
-    var a, b, c;
-    a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
-    b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
-    for (c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
-    var t = document.createElement('script');
-    t.id = 'cio-tracker-js';
-    t.async = true;
-    t.setAttribute('data-site-id', siteId);
-    t.setAttribute('data-use-array-params', 'true');
-    t.setAttribute('data-use-in-app', 'true');
-    t.setAttribute('data-in-app-use-persistence', 'true');
-    t.src = 'https://assets.customer.io/assets/track.js';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(t, s);
-  })();
+  // track.js requires its config via a pre-existing script tag with data-site-id
+  // We inject the config inline then load the script separately
+  var config = document.createElement('script');
+  config.id = 'cio-tracker-js';
+  config.setAttribute('data-site-id', siteId);
+  config.setAttribute('data-use-array-params', 'true');
+  config.setAttribute('data-use-in-app', 'true');
+  config.setAttribute('data-in-app-use-persistence', 'true');
+  document.head.appendChild(config);
+
+  // Stub _cio queue before script loads
+  window._cio = window._cio || [];
+  var a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
+  var b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
+  for (var c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
+
+  var t = document.createElement('script');
+  t.async = true;
+  t.src = 'https://assets.customer.io/assets/track.js';
+  document.head.appendChild(t);
 }
 
 function loadAnalyticsJS(writeKey) {
