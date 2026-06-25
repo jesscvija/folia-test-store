@@ -1589,6 +1589,7 @@ function navigate(page, plantId) {
     document.getElementById('page-admin').classList.add('active');
     state.currentPage = 'admin';
     window.scrollTo(0, 0);
+    history.pushState(null, '', '#admin');
     if (!adminUnlocked) {
       document.getElementById('admin-pin-screen').style.display = 'block';
       document.getElementById('admin-content').style.display = 'none';
@@ -1601,6 +1602,15 @@ function navigate(page, plantId) {
   document.getElementById('page-' + page).classList.add('active');
   state.currentPage = page;
   window.scrollTo(0, 0);
+
+  // Update URL hash
+  if (page === 'detail' && plantId) {
+    history.pushState(null, '', '#product-' + plantId);
+  } else if (page === 'home') {
+    history.pushState(null, '', '/');
+  } else {
+    history.pushState(null, '', '#' + page);
+  }
 
   if (page === 'home') { renderHome(); cioPage('Home'); }
   if (page === 'shop') { renderShop(); cioPage('Shop'); }
@@ -2441,9 +2451,31 @@ function triggerPostPurchaseIAB() {
 applySettings();
 
 // ─────────────────────────────────────────────
+// HASH ROUTING — read hash on load + back/forward
+// ─────────────────────────────────────────────
+function navigateFromHash() {
+  const hash = window.location.hash;
+  if (!hash || hash === '#') { navigate('home'); return; }
+  if (hash === '#shop')        { navigate('shop'); return; }
+  if (hash === '#collections') { navigate('collections'); return; }
+  if (hash === '#cart')        { navigate('cart'); return; }
+  if (hash === '#wishlist')    { navigate('wishlist'); return; }
+  if (hash === '#confirmation'){ navigate('confirmation'); return; }
+  if (hash === '#admin')       { navigate('admin'); return; }
+  if (hash.startsWith('#product-')) {
+    const plantId = hash.replace('#product-', '');
+    navigate('detail', plantId);
+    return;
+  }
+  navigate('home');
+}
+
+window.addEventListener('popstate', navigateFromHash);
+
+// ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
-renderHome();
+navigateFromHash();
 
 
 </script>
