@@ -1,35 +1,21 @@
 // Vercel serverless function — fetches inbox messages for a user from CIO App API
-// Only works for the solutions demo workspace (hardcoded credentials)
-// Deploy alongside index.html in the same repo
+// Hardcoded to the solutions demo workspace
 
-const CIO_APP_API_KEY = process.env.CIO_APP_API_KEY;
-const CIO_ENVIRONMENT_ID = process.env.CIO_ENVIRONMENT_ID;
+const CIO_APP_API_KEY = '0a0c32e76237dbadd42f2afe3e954513';
+const CIO_ENVIRONMENT_ID = '126697';
 
 export default async function handler(req, res) {
-  // CORS headers so the store can call this from the browser
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   const { email } = req.query;
-  if (!email) {
-    return res.status(400).json({ error: 'email query param required' });
-  }
-
-  if (!CIO_APP_API_KEY || !CIO_ENVIRONMENT_ID) {
-    return res.status(500).json({ error: 'CIO credentials not configured' });
-  }
+  if (!email) return res.status(400).json({ error: 'email query param required' });
 
   try {
-    // Fetch deliveries for this customer filtered to in_app type
     const url = new URL(`https://api.customer.io/v1/environments/${CIO_ENVIRONMENT_ID}/deliveries`);
     url.searchParams.set('customer_id', email);
     url.searchParams.set('type', 'in_app');
@@ -49,9 +35,8 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // Filter to inbox-type deliveries and shape the response
     const messages = (data.deliveries || [])
-      .filter(d => d.sent_at) // only sent messages
+      .filter(d => d.sent_at)
       .map(d => ({
         id: d.id,
         title: d.subject || d.preview || 'New notification',
