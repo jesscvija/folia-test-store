@@ -1,7 +1,7 @@
 // Vercel serverless function — fetches inbox messages for a user from CIO App API
-// Hardcoded to the solutions demo workspace
+// Hardcoded to the solutions demo workspace (workspace 126697)
 
-const CIO_APP_API_KEY = '0a0c32e76237dbadd42f2afe3e954513';
+const CIO_APP_API_KEY = 'e0f029f2588ba77d7dcd';
 const CIO_ENVIRONMENT_ID = '126697';
 
 export default async function handler(req, res) {
