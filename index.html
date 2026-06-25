@@ -1443,41 +1443,13 @@ function plantSVG(plant, size = 'card') {
 const DEFAULT_WRITE_KEY = '3f3863a39ea3840479e9';
 const DEFAULT_SITE_ID = '3f3863a39ea3840479e9';
 
-// Track whether we're on the default demo workspace
 let isDefaultWorkspace = true;
 
 function getCIO() {
-  return isDefaultWorkspace ? (window._cio || null) : (window.cioanalytics || null);
+  return window.cioanalytics || null;
 }
 
-function loadTrackJS(siteId) {
-  var existing = document.getElementById('cio-tracker-js');
-  if (existing) existing.remove();
-
-  // track.js requires its config via a pre-existing script tag with data-site-id
-  // We inject the config inline then load the script separately
-  var config = document.createElement('script');
-  config.id = 'cio-tracker-js';
-  config.setAttribute('data-site-id', siteId);
-  config.setAttribute('data-use-array-params', 'true');
-  config.setAttribute('data-use-in-app', 'true');
-  config.setAttribute('data-in-app-use-persistence', 'true');
-  document.head.appendChild(config);
-
-  // Stub _cio queue before script loads
-  window._cio = window._cio || [];
-  var a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
-  var b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
-  for (var c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
-
-  var t = document.createElement('script');
-  t.async = true;
-  t.src = 'https://assets.customer.io/assets/track.js';
-  document.head.appendChild(t);
-}
-
-function loadAnalyticsJS(writeKey) {
-  // Analytics.js — for custom workspaces (no inbox support)
+function loadAnalyticsJS(writeKey, isDefault) {
   if (window.cioanalytics && window.cioanalytics.initialized) {
     window.cioanalytics = undefined;
   }
@@ -1505,7 +1477,10 @@ function loadAnalyticsJS(writeKey) {
       analytics.SNIPPET_VERSION="4.15.3";
       analytics.load(writeKey, {
         integrations: {
-          "Customer.io In-App Plugin": { anonymousInApp: true }
+          "Customer.io In-App Plugin": {
+            anonymousInApp: true,
+            siteId: writeKey
+          }
         }
       });
       analytics.page();
@@ -1513,21 +1488,16 @@ function loadAnalyticsJS(writeKey) {
   }();
 }
 
-// On load — use custom key from localStorage if set, else default (track.js)
+// On load — use custom key from localStorage if set, else default
 const sessionKey = localStorage.getItem('folia_write_key');
 
 if (sessionKey) {
   isDefaultWorkspace = false;
-  loadAnalyticsJS(sessionKey);
+  loadAnalyticsJS(sessionKey, false);
   document.getElementById('cio-status-text').textContent = 'Connected · Custom workspace';
 } else {
   isDefaultWorkspace = true;
-  // Defer track.js load until DOM is fully ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { loadTrackJS(DEFAULT_SITE_ID); });
-  } else {
-    loadTrackJS(DEFAULT_SITE_ID);
-  }
+  loadAnalyticsJS(DEFAULT_WRITE_KEY, true);
 }
 
 state.cioConnected = true;
@@ -1596,8 +1566,7 @@ function logOut() {
   updateCartBadge();
   updateInboxBadge();
   const cio = getCIO();
-  if (isDefaultWorkspace && window._cio && _cio.reset) { _cio.reset(); }
-  else if (!isDefaultWorkspace && window.cioanalytics && cioanalytics.reset) { cioanalytics.reset(); }
+  if (window.cioanalytics && cioanalytics.reset) cioanalytics.reset();
   showToast('👋', 'Signed out', 'Session cleared');
   navigate('home');
 }
@@ -1609,16 +1578,18 @@ function logOut() {
 // NOTIFICATION INBOX — powered by Customer.io
 // ─────────────────────────────────────────────
 function initInbox() {
-  // Inbox only works on the solutions demo workspace (track.js)
+  // Bell only shows on default solutions demo workspace
   if (!isDefaultWorkspace) return;
-
   document.getElementById('inbox-toggle-btn').style.display = 'flex';
 
-  window.addEventListener('customerio:in-app:message-received', function(e) {
-    const msg = e.detail || {};
-    if (msg.persistMessage || msg.inbox) {
-      addInboxMessage(msg.title || msg.subject || 'New notification', msg.body || msg.message || '');
-    }
+  // Listen for inbox messages via the in-app plugin event
+  window.addEventListener('message', function(e) {
+    try {
+      const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+      if (data && data.type === 'cio:inbox:message' && data.payload) {
+        addInboxMessage(data.payload.title || 'New notification', data.payload.body || '');
+      }
+    } catch(err) {}
   });
 }
 
@@ -1678,29 +1649,17 @@ function renderInboxFeed() {
 
 function cioTrack(event, props) {
   showToast('⚡', event, props ? JSON.stringify(props).slice(0,80) : '');
-  if (isDefaultWorkspace && window._cio) {
-    _cio.track(event, props || {});
-  } else if (!isDefaultWorkspace && window.cioanalytics) {
-    cioanalytics.track(event, props || {});
-  }
+  if (window.cioanalytics) cioanalytics.track(event, props || {});
 }
 
 function cioPage(name, props) {
   showToast('👁', 'page_viewed', name);
-  if (isDefaultWorkspace && window._cio) {
-    _cio.page(name, props || {});
-  } else if (!isDefaultWorkspace && window.cioanalytics) {
-    cioanalytics.page(name, props || {});
-  }
+  if (window.cioanalytics) cioanalytics.page(name, props || {});
 }
 
 function cioIdentify(attrs) {
   showToast('👤', 'identify', attrs.email);
-  if (isDefaultWorkspace && window._cio) {
-    _cio.identify(attrs);
-  } else if (!isDefaultWorkspace && window.cioanalytics) {
-    cioanalytics.identify(attrs.id || attrs.email, attrs);
-  }
+  if (window.cioanalytics) cioanalytics.identify(attrs.id || attrs.email, attrs);
 }
 
 function cioObjectRelationship(action, plant) {
