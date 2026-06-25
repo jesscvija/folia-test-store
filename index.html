@@ -88,44 +88,6 @@
     }
     #config-banner button:hover { background: #3a5434; }
 
-    /* ── EVENT LOG ── */
-    #event-log {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 320px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      pointer-events: none;
-    }
-    .event-toast {
-      background: var(--ink);
-      color: #fff;
-      border-radius: var(--radius-lg);
-      padding: 10px 14px;
-      font-size: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      animation: toastIn 0.25s ease;
-      pointer-events: auto;
-    }
-    .event-toast .event-name {
-      font-weight: 500;
-      color: #8BA888;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .event-toast .event-detail { color: rgba(255,255,255,0.7); font-size: 11px; }
-    @keyframes toastIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
     /* ── NAV ── */
     nav {
       background: var(--white);
@@ -1175,8 +1137,6 @@
   </div>
 </div>
 
-<!-- EVENT LOG -->
-<div id="event-log"></div>
 
 <footer>
   <p><span>Folia</span> — A Customer.io test store. No real plants were harmed.</p>
@@ -1364,11 +1324,29 @@ function plantSVG(plant, size = 'card') {
 // CUSTOMER.IO — Analytics.js (workspace-aware)
 // ─────────────────────────────────────────────
 const DEFAULT_WRITE_KEY = '3f3863a39ea3840479e9';
+const DEFAULT_SITE_ID = '7488f1e71edc6a2961f9';
+
+let isDefaultWorkspace = true;
+
+function loadTrackJS(siteId) {
+  window._cio = window._cio || [];
+  (function() {
+    var a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
+    var b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
+    for (var c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
+    var t = document.createElement('script');
+    t.async = true;
+    t.setAttribute('data-site-id', siteId);
+    t.setAttribute('data-use-array-params', 'true');
+    t.setAttribute('data-use-in-app', 'true');
+    t.src = 'https://assets.customer.io/assets/track.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(t, s);
+  })();
+}
 
 function loadAnalyticsJS(writeKey) {
-  if (window.cioanalytics && window.cioanalytics.initialized) {
-    window.cioanalytics = undefined;
-  }
+  if (window.cioanalytics && window.cioanalytics.initialized) window.cioanalytics = undefined;
   var existing = document.getElementById('cio-analytics-js');
   if (existing) existing.remove();
 
@@ -1402,10 +1380,13 @@ function loadAnalyticsJS(writeKey) {
 }
 
 const sessionKey = localStorage.getItem('folia_write_key');
-loadAnalyticsJS(sessionKey || DEFAULT_WRITE_KEY);
-
 if (sessionKey) {
+  isDefaultWorkspace = false;
+  loadAnalyticsJS(sessionKey);
   document.getElementById('cio-status-text').textContent = 'Connected · Custom workspace';
+} else {
+  isDefaultWorkspace = true;
+  loadTrackJS(DEFAULT_SITE_ID);
 }
 
 state.cioConnected = true;
@@ -1459,29 +1440,29 @@ function logOut() {
   document.getElementById('nav-user-label').textContent = 'Sign in';
   document.getElementById('user-menu').style.display = 'none';
   updateCartBadge();
-  if (window.cioanalytics && cioanalytics.reset) cioanalytics.reset();
+  if (isDefaultWorkspace && window._cio && _cio.reset) { _cio.reset(); }
+  else if (!isDefaultWorkspace && window.cioanalytics && cioanalytics.reset) { cioanalytics.reset(); }
   showToast('👋', 'Signed out', 'Session cleared');
   navigate('home');
 }
 
 // ─────────────────────────────────────────────
 function cioTrack(event, props) {
-  showToast('⚡', event, props ? JSON.stringify(props).slice(0,80) : '');
-  if (window.cioanalytics) cioanalytics.track(event, props || {});
+  if (isDefaultWorkspace && window._cio) { _cio.track(event, props || {}); }
+  else if (!isDefaultWorkspace && window.cioanalytics) { cioanalytics.track(event, props || {}); }
 }
 
 function cioPage(name, props) {
-  showToast('👁', 'page_viewed', name);
-  if (window.cioanalytics) cioanalytics.page(name, props || {});
+  if (isDefaultWorkspace && window._cio) { _cio.page(name, props || {}); }
+  else if (!isDefaultWorkspace && window.cioanalytics) { cioanalytics.page(name, props || {}); }
 }
 
 function cioIdentify(attrs) {
-  showToast('👤', 'identify', attrs.email);
-  if (window.cioanalytics) cioanalytics.identify(attrs.id || attrs.email, attrs);
+  if (isDefaultWorkspace && window._cio) { _cio.identify(attrs); }
+  else if (!isDefaultWorkspace && window.cioanalytics) { cioanalytics.identify(attrs.id || attrs.email, attrs); }
 }
 
 function cioObjectRelationship(action, plant) {
-  showToast('🔗', action === 'add' ? 'object_relationship_created' : 'object_relationship_deleted', `Plant: ${plant.name}`);
   cioTrack(action === 'add' ? 'plant_saved' : 'plant_unsaved', {
     plant_id: plant.id,
     plant_name: plant.name,
@@ -1489,19 +1470,8 @@ function cioObjectRelationship(action, plant) {
   });
 }
 
-// ─────────────────────────────────────────────
-// TOAST
-// ─────────────────────────────────────────────
-function showToast(icon, name, detail) {
-  const log = document.getElementById('event-log');
-  const toast = document.createElement('div');
-  toast.className = 'event-toast';
-  toast.innerHTML = `<div class="event-name">${icon} ${name}</div>${detail ? `<div class="event-detail">${detail}</div>` : ''}`;
-  log.prepend(toast);
-  setTimeout(() => toast.style.opacity = '0', 2800);
-  setTimeout(() => toast.remove(), 3100);
-  while (log.children.length > 4) log.removeChild(log.lastChild);
-}
+// Toast removed — no-op stub kept for any remaining references
+function showToast() {}
 
 // ─────────────────────────────────────────────
 // NAVIGATION
