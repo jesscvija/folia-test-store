@@ -2009,11 +2009,14 @@ function placeOrder() {
 
   cioIdentify({ id: email, email, name: state.user.name, first_name: first, last_name: last });
 
+  const itemsFlat = items.map(i => ({ id: i.plant.id, name: i.plant.name, price: i.plant.price, quantity: i.qty }));
   cioTrack('order_completed', {
     order_id: orderId,
     revenue: total,
     currency: 'USD',
-    items: items.map(i => ({ id: i.plant.id, name: i.plant.name, price: i.plant.price, quantity: i.qty }))
+    item_count: items.reduce((s, i) => s + i.qty, 0),
+    item_names: itemsFlat.map(i => i.name).join(', '),
+    items: itemsFlat
   });
 
   if (abandonedCartTimer) clearTimeout(abandonedCartTimer);
