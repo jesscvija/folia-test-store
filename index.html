@@ -1416,7 +1416,8 @@ let state = {
   currentPage: 'home',
   cioConnected: false,
   authTab: 'login',
-  currentPlant: null
+  currentPlant: null,
+  inboxMessages: []
 };
 
 let abandonedCartTimer = null;
@@ -1543,6 +1544,7 @@ function logOut() {
   state.user = null;
   state.cart = [];
   state.saved = [];
+  state.inboxMessages = [];
   iabShown = {};
   document.getElementById('nav-user-label').textContent = 'Sign in';
   document.getElementById('user-menu').style.display = 'none';
@@ -1563,29 +1565,32 @@ function logOut() {
 // NOTIFICATION INBOX — powered by Customer.io
 // ─────────────────────────────────────────────
 function initInbox() {
-  // Show the bell icon now that user is identified
   document.getElementById('inbox-toggle-btn').style.display = 'flex';
 
-  // Register the inbox feed container with CIO's SDK
-  // CIO will render inbox messages into #cio-inbox-feed automatically
+  // CIO's in-app plugin fires a 'customerio:in-app:message-received' event
+  // on the window for inbox messages. We listen and render them ourselves.
+  window.addEventListener('customerio:in-app:message-received', function(e) {
+    const msg = e.detail || {};
+    addInboxMessage(
+      msg.title || msg.subject || 'New notification',
+      msg.body || msg.message || ''
+    );
+  });
+
+  // Also try the cioanalytics ready callback to register inbox if SDK supports it
   const cio = getCIO();
-  if (cio && cio.inbox) {
-    try {
-      cio.inbox.initialize({
-        containerId: 'cio-inbox-feed',
-        callbacks: {
-          onCountChange: function(count) {
-            const badge = document.getElementById('inbox-badge');
-            if (badge) {
-              badge.textContent = count;
-              badge.classList.toggle('visible', count > 0);
-            }
+  if (cio && cio.ready) {
+    cio.ready(function() {
+      if (window.CustomerIO && window.CustomerIO.inbox) {
+        window.CustomerIO.inbox.fetchMessages(function(msgs) {
+          if (msgs && msgs.length) {
+            msgs.forEach(function(msg) {
+              addInboxMessage(msg.title || 'Notification', msg.body || '');
+            });
           }
-        }
-      });
-    } catch(e) {
-      // SDK inbox not available in this version — fail silently
-    }
+        });
+      }
+    });
   }
 }
 
@@ -1593,11 +1598,53 @@ function toggleInbox() {
   const el = document.getElementById('inbox-container');
   const isOpen = el.style.display === 'block';
   el.style.display = isOpen ? 'none' : 'block';
-  // Reset badge when opened
   if (!isOpen) {
-    const badge = document.getElementById('inbox-badge');
-    if (badge) { badge.textContent = '0'; badge.classList.remove('visible'); }
+    // Mark all read
+    state.inboxMessages.forEach(m => m.read = true);
+    updateInboxBadge();
+    renderInboxFeed();
   }
+}
+
+function addInboxMessage(title, body) {
+  if (!state.inboxMessages) state.inboxMessages = [];
+  state.inboxMessages.unshift({
+    id: Date.now(),
+    title,
+    body,
+    read: false,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+  updateInboxBadge();
+  renderInboxFeed();
+  showToast('🔔', 'inbox_message_received', title);
+}
+
+function updateInboxBadge() {
+  const unread = (state.inboxMessages || []).filter(m => !m.read).length;
+  const badge = document.getElementById('inbox-badge');
+  if (badge) {
+    badge.textContent = unread;
+    badge.classList.toggle('visible', unread > 0);
+  }
+}
+
+function renderInboxFeed() {
+  const feed = document.getElementById('cio-inbox-feed');
+  if (!feed) return;
+  const msgs = state.inboxMessages || [];
+  if (msgs.length === 0) {
+    feed.innerHTML = '<div style="padding:32px 18px;text-align:center;color:var(--ink-faint);font-size:13px">No notifications yet</div>';
+    return;
+  }
+  feed.innerHTML = msgs.map(m => `
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);background:${m.read ? 'transparent' : 'var(--sage-light)'}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
+        <div style="font-weight:500;font-size:13px;color:var(--ink)">${m.title}</div>
+        <div style="font-size:11px;color:var(--ink-faint);white-space:nowrap">${m.time}</div>
+      </div>
+      <div style="font-size:12px;color:var(--ink-muted);line-height:1.5">${m.body}</div>
+    </div>`).join('');
 }
 
 // Close inbox when clicking outside
