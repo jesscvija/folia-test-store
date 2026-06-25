@@ -1589,6 +1589,8 @@ function showToast(icon, name, detail) {
 function pushHash(hash) {
   try { history.pushState(null, '', hash); } catch(e) {}
 }
+
+function navigate(page, plantId) {
   if (page === 'admin') {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-admin').classList.add('active');
