@@ -7,26 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
-  <script>
-    // Only load track.js if no custom workspace key is set
-    if (!localStorage.getItem('folia_write_key')) {
-      var _cio = _cio || [];
-      (function() {
-        var a, b, c;
-        a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
-        b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
-        for (c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
-        var t = document.createElement('script'),
-            s = document.getElementsByTagName('script')[0];
-        t.async = true;
-        t.setAttribute('data-site-id', '7488f1e71edc6a2961f9');
-        t.setAttribute('data-use-array-params', 'true');
-        t.setAttribute('data-use-in-app', 'true');
-        t.src = 'https://assets.customer.io/assets/track.js';
-        s.parentNode.insertBefore(t, s);
-      })();
-    }
-  </script>
+  <script>var _cio = _cio || [];</script>
+  <script async data-site-id="7488f1e71edc6a2961f9" data-use-array-params="true" data-use-in-app="true" src="https://assets.customer.io/assets/track.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1348,6 +1330,16 @@ const DEFAULT_SITE_ID = '7488f1e71edc6a2961f9';
 
 let isDefaultWorkspace = true;
 
+// Ensure _cio queue methods exist before track.js initializes
+window._cio = window._cio || [];
+if (!window._cio.identify) {
+  (function() {
+    var a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
+    var b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
+    for (var c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
+  })();
+}
+
 function loadAnalyticsJS(writeKey) {
   if (window.cioanalytics && window.cioanalytics.initialized) window.cioanalytics = undefined;
   var existing = document.getElementById('cio-analytics-js');
@@ -1385,11 +1377,13 @@ function loadAnalyticsJS(writeKey) {
 const sessionKey = localStorage.getItem('folia_write_key');
 if (sessionKey) {
   isDefaultWorkspace = false;
+  // Neutralize _cio so track.js events go nowhere
+  window._cio = { identify: function(){}, track: function(){}, page: function(){}, sidentify: function(){}, on: function(){}, off: function(){} };
   loadAnalyticsJS(sessionKey);
   document.getElementById('cio-status-text').textContent = 'Connected · Custom workspace';
 } else {
   isDefaultWorkspace = true;
-  // track.js already loaded from <head>
+  // track.js loaded from <head> — already queuing calls via _cio
 }
 
 state.cioConnected = true;
