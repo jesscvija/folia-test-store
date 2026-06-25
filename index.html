@@ -1458,7 +1458,13 @@ function loadAnalyticsJS(writeKey) {
         analytics._writeKey=key;analytics._loadOptions=e;
       };
       analytics.SNIPPET_VERSION="4.15.3";
-      analytics.load(writeKey);
+      analytics.load(writeKey, {
+        integrations: {
+          "Customer.io In-App Plugin": {
+            anonymousInApp: true
+          }
+        }
+      });
       analytics.page();
     }
   }();
@@ -1586,7 +1592,9 @@ function showToast(icon, name, detail) {
 // ─────────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────────
+let _initialLoad = true;
 function pushHash(hash) {
+  if (_initialLoad) return;
   try { history.pushState(null, '', hash); } catch(e) {}
 }
 
@@ -2501,6 +2509,7 @@ window.addEventListener('popstate', navigateFromHash);
 // INIT
 // ─────────────────────────────────────────────
 navigateFromHash();
+_initialLoad = false;
 
 
 </script>
