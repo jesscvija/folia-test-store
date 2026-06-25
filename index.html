@@ -1471,7 +1471,7 @@ function loadAnalyticsJS(writeKey) {
 }
 
 // On load — use custom key from sessionStorage if set, else default
-const sessionKey = sessionStorage.getItem('folia_write_key');
+const sessionKey = localStorage.getItem('folia_write_key');
 const activeWriteKey = sessionKey || DEFAULT_WRITE_KEY;
 loadAnalyticsJS(activeWriteKey);
 
@@ -1487,7 +1487,7 @@ function toggleWorkspaceSwitcher() {
   el.style.display = isOpen ? 'none' : 'flex';
   if (!isOpen) {
     document.getElementById('ws-write-key').focus();
-    const current = sessionStorage.getItem('folia_write_key') || '';
+    const current = localStorage.getItem('folia_write_key') || '';
     document.getElementById('ws-write-key').value = current;
   }
 }
@@ -1495,13 +1495,13 @@ function toggleWorkspaceSwitcher() {
 function switchWorkspace() {
   const key = document.getElementById('ws-write-key').value.trim();
   if (!key) { showToast('⚠', 'No write key entered', 'Paste your Analytics.js write key'); return; }
-  sessionStorage.setItem('folia_write_key', key);
+  localStorage.setItem('folia_write_key', key);
   // Reload so the snippet initialises fresh with the new key
   location.reload();
 }
 
 function resetWorkspace() {
-  sessionStorage.removeItem('folia_write_key');
+  localStorage.removeItem('folia_write_key');
   // Reload so the default key initialises fresh
   location.reload();
 }
