@@ -1558,12 +1558,21 @@ function toggleUserMenu() {
   menu.style.display = isOpen ? 'none' : 'block';
 }
 
-// Close user menu when clicking outside
-document.addEventListener('click', function(e) {
+// Close user menu when clicking outside — use mousedown to run before click
+document.addEventListener('mousedown', function(e) {
   const btn = document.getElementById('user-nav-btn');
   const menu = document.getElementById('user-menu');
   if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
     menu.style.display = 'none';
+  }
+});
+
+// Close inbox when clicking outside
+document.addEventListener('mousedown', function(e) {
+  const wrap = document.getElementById('inbox-nav-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    const el = document.getElementById('inbox-container');
+    if (el) el.style.display = 'none';
   }
 });
 
@@ -1659,14 +1668,6 @@ function renderInboxFeed() {
     </div>`).join('');
 }
 
-// Close inbox when clicking outside
-document.addEventListener('click', function(e) {
-  const wrap = document.getElementById('inbox-nav-wrap');
-  if (wrap && !wrap.contains(e.target)) {
-    const el = document.getElementById('inbox-container');
-    if (el) el.style.display = 'none';
-  }
-});
 
 function cioTrack(event, props) {
   showToast('⚡', event, props ? JSON.stringify(props).slice(0,80) : '');
