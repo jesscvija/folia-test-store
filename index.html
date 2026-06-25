@@ -1177,7 +1177,10 @@
             <div class="admin-card-title">Reset</div>
           </div>
           <p style="font-size:13px;color:var(--ink-muted);margin-bottom:14px">Clear all admin customisations and restore the default store settings.</p>
-          <button class="btn-danger" onclick="resetAdminSettings()">Reset to defaults</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-danger" onclick="resetAdminSettings()">Reset to defaults</button>
+            <button class="btn-sm-outline" onclick="clearPlantCache()" style="font-size:12px">Clear product cache</button>
+          </div>
         </div>
 
         <div style="margin-top:16px;display:flex;justify-content:flex-end">
@@ -2070,14 +2073,19 @@ let adminSettings = adminLoad('settings', {
 let adminEvents = adminLoad('events', null);
 let adminMessages = adminLoad('messages', null);
 
-// Merge persisted plant edits into PLANTS array
-const savedPlants = adminLoad('plants', null);
-if (savedPlants) {
-  savedPlants.forEach(saved => {
-    const idx = PLANTS.findIndex(p => p.id === saved.id);
-    if (idx !== -1) Object.assign(PLANTS[idx], saved);
-    else PLANTS.push(saved);
-  });
+// Merge persisted plant edits into PLANTS array (edits only, never replace)
+try {
+  const savedPlants = adminLoad('plants', null);
+  if (savedPlants && Array.isArray(savedPlants) && savedPlants.length > 0) {
+    savedPlants.forEach(saved => {
+      const idx = PLANTS.findIndex(p => p.id === saved.id);
+      if (idx !== -1) Object.assign(PLANTS[idx], saved);
+      // Don't push new plants from localStorage — must be added via admin panel at runtime
+    });
+  }
+} catch(e) {
+  // If localStorage plant data is corrupted, clear it and use defaults
+  try { localStorage.removeItem('folia_plants'); } catch(e2) {}
 }
 
 // Default event config
@@ -2408,6 +2416,12 @@ function resetAdminSettings() {
   location.reload();
 }
 
+function clearPlantCache() {
+  try { localStorage.removeItem('folia_plants'); } catch(e) {}
+  showToast('✓', 'Product cache cleared', 'Reloading...');
+  setTimeout(() => location.reload(), 800);
+}
+
 // ─────────────────────────────────────────────
 // OVERRIDE IAB to use messageConfig
 // ─────────────────────────────────────────────
@@ -2455,6 +2469,13 @@ applySettings();
 // ─────────────────────────────────────────────
 // HASH ROUTING — read hash on load + back/forward
 // ─────────────────────────────────────────────
+
+// Self-heal: if PLANTS array ended up empty somehow, clear localStorage and reload
+if (PLANTS.length === 0) {
+  try { localStorage.removeItem('folia_plants'); } catch(e) {}
+  location.reload();
+}
+
 function navigateFromHash() {
   const hash = window.location.hash;
   if (!hash || hash === '#') { navigate('home'); return; }
