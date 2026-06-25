@@ -1406,42 +1406,43 @@ function plantSVG(plant, size = 'card') {
 }
 
 // ─────────────────────────────────────────────
-// CUSTOMER.IO
-// ─────────────────────────────────────────────
-// ─────────────────────────────────────────────
 // CUSTOMER.IO — Analytics.js (workspace-aware)
 // ─────────────────────────────────────────────
 const DEFAULT_WRITE_KEY = '3f3863a39ea3840479e9';
 
+function getCIO() {
+  return window.cioanalytics || null;
+}
+
 function loadAnalyticsJS(writeKey) {
-  // Reset analytics if already loaded so we can reinitialise
-  if (window.analytics && window.analytics.initialized) {
-    window.analytics = undefined;
+  // Reset so we can reinitialise with a different key
+  if (window.cioanalytics && window.cioanalytics.initialized) {
+    window.cioanalytics = undefined;
   }
+  var existing = document.getElementById('cio-analytics-js');
+  if (existing) existing.remove();
 
   !function(){
-    var analytics=window.analytics=window.analytics||[];
-    if(!analytics.initialize){
-      if(analytics.invoked){return;}
+    var i="cioanalytics", analytics=(window[i]=window[i]||[]);
+    if(!analytics.initialize) {
+      if(analytics.invoked) { window.console&&console.error&&console.error("Snippet included twice."); return; }
       analytics.invoked=!0;
-      analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","screen","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware","registerIntegration","waitForUpdate"];
-      analytics.factory=function(e){return function(){if(window.analytics.initialized)return window.analytics[e].apply(window.analytics,arguments);var i=Array.prototype.slice.call(arguments);if(["track","screen","alias","group","page","identify"].indexOf(e)>-1){var c=document.querySelector("link[rel='canonical']");i.push({__t:"bpc",c:c&&c.getAttribute("href")||void 0,p:location.pathname,u:location.href,s:location.search,t:document.title,r:document.referrer});}i.unshift(e);analytics.push(i);return analytics;}};
-      for(var i=0;i<analytics.methods.length;i++){var key=analytics.methods[i];analytics[key]=analytics.factory(key);}
-      analytics.load=function(key,i){
-        var existing=document.getElementById('cio-analytics-js');
-        if(existing) existing.remove();
+      analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];
+      analytics.factory=function(e){return function(){var t=Array.prototype.slice.call(arguments);t.unshift(e);analytics.push(t);return analytics}};
+      for(var e=0;e<analytics.methods.length;e++){var key=analytics.methods[e];analytics[key]=analytics.factory(key)}
+      analytics.load=function(key,e){
         var t=document.createElement("script");
         t.id='cio-analytics-js';
         t.type="text/javascript";t.async=!0;
+        t.setAttribute('data-global-customerio-analytics-key', i);
         t.src="https://cdp.customer.io/v1/analytics-js/snippet/"+key+"/analytics.min.js";
         var n=document.getElementsByTagName("script")[0];
         n.parentNode.insertBefore(t,n);
-        analytics._writeKey=key;analytics._loadOptions=i;
+        analytics._writeKey=key;analytics._loadOptions=e;
       };
-      analytics.SNIPPET_VERSION="5.0.1";
-      analytics.load(writeKey, {
-        integrations: { "Customer.io In-App Plugin": { siteId: writeKey } }
-      });
+      analytics.SNIPPET_VERSION="4.15.3";
+      analytics.load(writeKey);
+      analytics.page();
     }
   }();
 }
@@ -1477,7 +1478,6 @@ function switchWorkspace() {
   document.getElementById('cio-status-text').textContent = 'Connected · Custom workspace';
   document.getElementById('ws-switcher').style.display = 'none';
   showToast('✓', 'Workspace switched', key.slice(0,8) + '...');
-  cioPage('Home');
 }
 
 function resetWorkspace() {
@@ -1487,28 +1487,31 @@ function resetWorkspace() {
   document.getElementById('ws-write-key').value = '';
   document.getElementById('ws-switcher').style.display = 'none';
   showToast('✓', 'Reset to solutions demo', DEFAULT_WRITE_KEY.slice(0,8) + '...');
-  cioPage('Home');
 }
 
 function cioTrack(event, props) {
   showToast('⚡', event, props ? JSON.stringify(props).slice(0,80) : '');
-  if (window.analytics) analytics.track(event, props || {});
+  const cio = getCIO();
+  if (cio) cio.track(event, props || {});
 }
 
 function cioPage(name, props) {
   showToast('👁', 'page_viewed', name);
-  if (window.analytics) analytics.page(name, props || {});
+  const cio = getCIO();
+  if (cio) cio.page(name, props || {});
 }
 
 function cioIdentify(attrs) {
   showToast('👤', 'identify', attrs.email);
-  if (window.analytics) analytics.identify(attrs.id || attrs.email, attrs);
+  const cio = getCIO();
+  if (cio) cio.identify(attrs.id || attrs.email, attrs);
 }
 
 function cioObjectRelationship(action, plant) {
   showToast('🔗', action === 'add' ? 'object_relationship_created' : 'object_relationship_deleted', `Plant: ${plant.name}`);
-  if (window.analytics) {
-    analytics.track(action === 'add' ? 'plant_saved' : 'plant_unsaved', {
+  const cio = getCIO();
+  if (cio) {
+    cio.track(action === 'add' ? 'plant_saved' : 'plant_unsaved', {
       plant_id: plant.id,
       plant_name: plant.name,
       object_type_id: '1'
@@ -1517,6 +1520,7 @@ function cioObjectRelationship(action, plant) {
 }
 
 function initCIO() {}
+
 
 
 
@@ -1538,6 +1542,19 @@ function showToast(icon, name, detail) {
 // NAVIGATION
 // ─────────────────────────────────────────────
 function navigate(page, plantId) {
+  if (page === 'admin') {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-admin').classList.add('active');
+    state.currentPage = 'admin';
+    window.scrollTo(0, 0);
+    if (!adminUnlocked) {
+      document.getElementById('admin-pin-screen').style.display = 'block';
+      document.getElementById('admin-content').style.display = 'none';
+      setTimeout(() => document.getElementById('pin-0').focus(), 100);
+    }
+    return;
+  }
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   state.currentPage = page;
@@ -2368,26 +2385,6 @@ function triggerPostPurchaseIAB() {
     document.getElementById('in-app-msg').classList.add('show');
     cioTrack('in_app_message_shown', { trigger: 'post_purchase' });
   }, 2000);
-}
-
-// ─────────────────────────────────────────────
-// PATCH NAVIGATE for admin
-// ─────────────────────────────────────────────
-const _origNavigate = navigate;
-function navigate(page, plantId) {
-  if (page === 'admin') {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-admin').classList.add('active');
-    state.currentPage = 'admin';
-    window.scrollTo(0,0);
-    if (!adminUnlocked) {
-      document.getElementById('admin-pin-screen').style.display = 'block';
-      document.getElementById('admin-content').style.display = 'none';
-      setTimeout(() => document.getElementById('pin-0').focus(), 100);
-    }
-    return;
-  }
-  _origNavigate(page, plantId);
 }
 
 // Apply persisted settings on load
