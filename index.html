@@ -7,26 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
-  <!-- Customer.io track.js — solutions demo workspace -->
-  <script>
-    var _cio = _cio || [];
-    (function() {
-      var a, b, c;
-      a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
-      b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
-      for (c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
-      var t = document.createElement('script'),
-          s = document.getElementsByTagName('script')[0];
-      t.async = true;
-      t.id = 'cio-tracker';
-      t.setAttribute('data-site-id', '209cffe571eda204979b');
-      t.setAttribute('data-use-array-params', 'true');
-      t.setAttribute('data-use-in-app', 'true');
-      t.setAttribute('data-in-app-use-persistence', 'true');
-      t.src = 'https://assets.customer.io/assets/track.js';
-      s.parentNode.insertBefore(t, s);
-    })();
-  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -663,46 +643,6 @@
     }
     .auth-tab.active { color: var(--sage); border-bottom-color: var(--sage); }
 
-    /* ── IN-APP MESSAGE ── */
-    #in-app-msg {
-      display: none;
-      position: fixed;
-      bottom: 24px;
-      left: 24px;
-      width: 340px;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      box-shadow: 0 12px 40px rgba(28,28,24,0.14);
-      padding: 20px;
-      z-index: 500;
-      animation: slideUp 0.3s ease;
-    }
-    #in-app-msg.show { display: block; }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .iab-close {
-      position: absolute;
-      top: 12px; right: 12px;
-      background: none; border: none; cursor: pointer;
-      color: var(--ink-faint); font-size: 18px; line-height: 1;
-    }
-    .iab-tag {
-      font-size: 10px; font-weight: 500; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--sage); margin-bottom: 8px;
-    }
-    .iab-title { font-weight: 500; font-size: 15px; margin-bottom: 6px; }
-    .iab-body { font-size: 13px; color: var(--ink-muted); margin-bottom: 14px; font-weight: 300; }
-    .iab-action {
-      background: var(--sage); color: #fff; border: none;
-      border-radius: var(--radius); padding: 8px 16px;
-      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-      cursor: pointer; transition: background 0.15s;
-    }
-    .iab-action:hover { background: #3a5434; }
-
     /* ── FOOTER ── */
     footer {
       border-top: 1px solid var(--border);
@@ -981,21 +921,6 @@
     <span class="nav-link" onclick="navigate('wishlist')">Saved</span>
   </div>
   <div class="nav-actions">
-    <div style="position:relative" id="inbox-nav-wrap">
-      <button class="nav-icon-btn" id="inbox-toggle-btn" onclick="toggleInbox()" style="display:none">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="cart-badge" id="inbox-badge" style="background:var(--sage)">0</span>
-      </button>
-      <div id="inbox-container" style="display:none;position:absolute;top:calc(100% + 8px);right:0;width:320px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 8px 32px rgba(28,28,24,0.12);z-index:300;overflow:hidden;max-height:480px;overflow-y:auto;">
-        <div style="padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-          <div style="font-weight:500;font-size:14px">Notifications</div>
-          <button onclick="toggleInbox()" style="background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:18px;line-height:1">×</button>
-        </div>
-        <div id="cio-inbox-feed">
-          <div style="padding:32px 18px;text-align:center;color:var(--ink-faint);font-size:13px">No notifications yet</div>
-        </div>
-      </div>
-    </div>
     <div style="position:relative">
       <button class="nav-icon-btn" onclick="toggleUserMenu()" id="user-nav-btn">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1157,17 +1082,6 @@
         </div>
       </div>
 
-      <!-- MESSAGES TAB -->
-      <div id="admin-messages" class="admin-section">
-        <div class="admin-card" style="margin-bottom:24px">
-          <p style="font-size:13px;color:var(--ink-muted);line-height:1.6">Edit the simulated in-app messages that appear in the store. These mimic what a real Customer.io in-app message looks like. Use them to show teammates what in-app messaging can look like for this use case.</p>
-        </div>
-        <div id="admin-message-list"></div>
-        <div style="margin-top:16px;display:flex;justify-content:flex-end">
-          <button class="btn-sm" onclick="saveMessages()">Save messages</button>
-        </div>
-      </div>
-
       <!-- SETTINGS TAB -->
       <div id="admin-settings" class="admin-section">
         <div class="admin-card">
@@ -1259,15 +1173,6 @@
       This is a test store. No real orders or accounts are created.
     </p>
   </div>
-</div>
-
-<!-- IN-APP MESSAGE -->
-<div id="in-app-msg">
-  <button class="iab-close" onclick="closeIAB()">×</button>
-  <div class="iab-tag" id="iab-tag">Folia</div>
-  <div class="iab-title" id="iab-title">You left something behind</div>
-  <div class="iab-body" id="iab-body">You have plants waiting in your cart. Complete your order before they sell out.</div>
-  <button class="iab-action" id="iab-action" onclick="navigate('cart');closeIAB()">Go to cart</button>
 </div>
 
 <!-- EVENT LOG -->
@@ -1436,12 +1341,10 @@ let state = {
   currentPage: 'home',
   cioConnected: false,
   authTab: 'login',
-  currentPlant: null,
-  inboxMessages: []
+  currentPlant: null
 };
 
 let abandonedCartTimer = null;
-let iabShown = {};
 
 // ─────────────────────────────────────────────
 // PLANT SVG ILLUSTRATIONS
@@ -1460,20 +1363,9 @@ function plantSVG(plant, size = 'card') {
 // ─────────────────────────────────────────────
 // CUSTOMER.IO — Analytics.js (workspace-aware)
 // ─────────────────────────────────────────────
-const DEFAULT_WRITE_KEY = '3f3863a39ea3840479e9'; // Analytics.js write key (for custom workspace comparison)
-const DEFAULT_SITE_ID = '209cffe571eda204979b'; // track.js site ID (solutions demo)
-
-let isDefaultWorkspace = true;
-
-function getCIO() {
-  return isDefaultWorkspace ? (window._cio || null) : (window.cioanalytics || null);
-}
+const DEFAULT_WRITE_KEY = '3f3863a39ea3840479e9';
 
 function loadAnalyticsJS(writeKey) {
-  // Remove track.js when switching to a custom workspace
-  var tracker = document.getElementById('cio-tracker');
-  if (tracker) tracker.remove();
-
   if (window.cioanalytics && window.cioanalytics.initialized) {
     window.cioanalytics = undefined;
   }
@@ -1509,27 +1401,11 @@ function loadAnalyticsJS(writeKey) {
   }();
 }
 
-// _cio is initialized by track.js in <head> — just ensure the queue exists
-// in case our JS runs before track.js finishes loading
-window._cio = window._cio || [];
-if (!window._cio.identify) {
-  (function() {
-    var a = function(f) { return function() { _cio.push([f].concat(Array.prototype.slice.call(arguments, 0))); }; };
-    var b = ['load', 'identify', 'sidentify', 'track', 'page', 'on', 'off'];
-    for (var c = 0; c < b.length; c++) { _cio[b[c]] = a(b[c]); }
-  })();
-}
-
-// Check if custom workspace is set — if so swap to Analytics.js
 const sessionKey = localStorage.getItem('folia_write_key');
+loadAnalyticsJS(sessionKey || DEFAULT_WRITE_KEY);
 
 if (sessionKey) {
-  isDefaultWorkspace = false;
-  loadAnalyticsJS(sessionKey);
   document.getElementById('cio-status-text').textContent = 'Connected · Custom workspace';
-} else {
-  isDefaultWorkspace = true;
-  // track.js already loaded in <head> — nothing to do
 }
 
 state.cioConnected = true;
@@ -1576,150 +1452,32 @@ document.addEventListener('mousedown', function(e) {
   }
 });
 
-// Close inbox when clicking outside
-document.addEventListener('mousedown', function(e) {
-  const wrap = document.getElementById('inbox-nav-wrap');
-  if (wrap && !wrap.contains(e.target)) {
-    const el = document.getElementById('inbox-container');
-    if (el) el.style.display = 'none';
-  }
-});
-
 function logOut() {
   state.user = null;
   state.cart = [];
   state.saved = [];
-  state.inboxMessages = [];
-  iabShown = {};
   document.getElementById('nav-user-label').textContent = 'Sign in';
   document.getElementById('user-menu').style.display = 'none';
-  document.getElementById('inbox-toggle-btn').style.display = 'none';
-  document.getElementById('inbox-container').style.display = 'none';
   updateCartBadge();
-  updateInboxBadge();
-  const cio = getCIO();
-  if (isDefaultWorkspace && window._cio && _cio.reset) { _cio.reset(); }
-  else if (!isDefaultWorkspace && window.cioanalytics && cioanalytics.reset) { cioanalytics.reset(); }
+  if (window.cioanalytics && cioanalytics.reset) cioanalytics.reset();
   showToast('👋', 'Signed out', 'Session cleared');
   navigate('home');
 }
 
 // ─────────────────────────────────────────────
-// NOTIFICATION INBOX
-// ─────────────────────────────────────────────
-// ─────────────────────────────────────────────
-// NOTIFICATION INBOX — powered by Customer.io
-// ─────────────────────────────────────────────
-function initInbox() {
-  // Bell only shows on default solutions demo workspace
-  if (!isDefaultWorkspace) return;
-  document.getElementById('inbox-toggle-btn').style.display = 'flex';
-}
-
-async function fetchInboxMessages(email) {
-  if (!isDefaultWorkspace || !email) return;
-  try {
-    const res = await fetch(`/api/inbox?email=${encodeURIComponent(email)}`);
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data.messages && data.messages.length) {
-      data.messages.forEach(m => {
-        // Avoid duplicates
-        if (!state.inboxMessages.find(existing => existing.id === m.id)) {
-          state.inboxMessages.unshift({
-            id: m.id,
-            title: m.title,
-            body: m.body,
-            read: false,
-            time: m.sent_at ? new Date(m.sent_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
-          });
-        }
-      });
-      updateInboxBadge();
-      renderInboxFeed();
-    }
-  } catch(e) {}
-}
-
-function toggleInbox() {
-  const el = document.getElementById('inbox-container');
-  const isOpen = el.style.display === 'block';
-  el.style.display = isOpen ? 'none' : 'block';
-  if (!isOpen) {
-    state.inboxMessages.forEach(m => m.read = true);
-    updateInboxBadge();
-    renderInboxFeed();
-    if (state.user) fetchInboxMessages(state.user.email);
-  }
-}
-
-function addInboxMessage(title, body) {
-  if (!state.inboxMessages) state.inboxMessages = [];
-  state.inboxMessages.unshift({
-    id: Date.now(),
-    title,
-    body,
-    read: false,
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  });
-  updateInboxBadge();
-  renderInboxFeed();
-  showToast('🔔', 'inbox_message_received', title);
-}
-
-function updateInboxBadge() {
-  const unread = (state.inboxMessages || []).filter(m => !m.read).length;
-  const badge = document.getElementById('inbox-badge');
-  if (badge) {
-    badge.textContent = unread;
-    badge.classList.toggle('visible', unread > 0);
-  }
-}
-
-function renderInboxFeed() {
-  const feed = document.getElementById('cio-inbox-feed');
-  if (!feed) return;
-  const msgs = state.inboxMessages || [];
-  if (msgs.length === 0) {
-    feed.innerHTML = '<div style="padding:32px 18px;text-align:center;color:var(--ink-faint);font-size:13px">No notifications yet</div>';
-    return;
-  }
-  feed.innerHTML = msgs.map(m => `
-    <div style="padding:14px 18px;border-bottom:1px solid var(--border);background:${m.read ? 'transparent' : 'var(--sage-light)'}">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
-        <div style="font-weight:500;font-size:13px;color:var(--ink)">${m.title}</div>
-        <div style="font-size:11px;color:var(--ink-faint);white-space:nowrap">${m.time}</div>
-      </div>
-      <div style="font-size:12px;color:var(--ink-muted);line-height:1.5">${m.body}</div>
-    </div>`).join('');
-}
-
-
 function cioTrack(event, props) {
   showToast('⚡', event, props ? JSON.stringify(props).slice(0,80) : '');
-  if (isDefaultWorkspace && window._cio) {
-    _cio.track(event, props || {});
-  } else if (!isDefaultWorkspace && window.cioanalytics) {
-    cioanalytics.track(event, props || {});
-  }
+  if (window.cioanalytics) cioanalytics.track(event, props || {});
 }
 
 function cioPage(name, props) {
   showToast('👁', 'page_viewed', name);
-  if (isDefaultWorkspace && window._cio) {
-    _cio.page(name, props || {});
-  } else if (!isDefaultWorkspace && window.cioanalytics) {
-    cioanalytics.page(name, props || {});
-  }
+  if (window.cioanalytics) cioanalytics.page(name, props || {});
 }
 
 function cioIdentify(attrs) {
   showToast('👤', 'identify', attrs.email);
-  if (isDefaultWorkspace && window._cio) {
-    _cio.identify(attrs);
-  } else if (!isDefaultWorkspace && window.cioanalytics) {
-    cioanalytics.identify(attrs.id || attrs.email, attrs);
-  }
+  if (window.cioanalytics) cioanalytics.identify(attrs.id || attrs.email, attrs);
 }
 
 function cioObjectRelationship(action, plant) {
@@ -1730,11 +1488,6 @@ function cioObjectRelationship(action, plant) {
     object_type_id: '1'
   });
 }
-
-function initCIO() {}
-
-
-
 
 // ─────────────────────────────────────────────
 // TOAST
@@ -1791,7 +1544,7 @@ function navigate(page, plantId) {
   if (page === 'home') { renderHome(); cioPage('Home'); }
   if (page === 'shop') { renderShop(); cioPage('Shop'); }
   if (page === 'collections') { renderCollections(); cioPage('Collections'); }
-  if (page === 'cart') { renderCart(); triggerCartIAB(); cioPage('Cart', { item_count: cartCount() }); }
+  if (page === 'cart') { renderCart(); cioPage('Cart', { item_count: cartCount() }); }
   if (page === 'wishlist') { renderWishlist(); cioPage('Wishlist'); }
   if (page === 'confirmation') { cioPage('Order Confirmation'); }
   if (page === 'detail' && plantId) {
@@ -2092,9 +1845,6 @@ function placeOrder() {
   updateCartBadge();
   renderConfirmation(orderId, items, total, email);
   navigate('confirmation');
-  triggerPostPurchaseIAB();
-  // Fetch inbox after a short delay so CIO has time to send the message
-  setTimeout(() => fetchInboxMessages(email), 4000);
 }
 
 function renderConfirmation(orderId, items, total, email) {
@@ -2207,47 +1957,7 @@ function submitAuth() {
   });
 
   closeAuth();
-  initInbox();
-  fetchInboxMessages(email);
   showToast('👤', state.authTab === 'signup' ? 'user_signed_up' : 'user_logged_in', email);
-}
-
-// ─────────────────────────────────────────────
-// IN-APP MESSAGES
-// ─────────────────────────────────────────────
-function triggerCartIAB() {
-  if (cartCount() > 0 && !iabShown['cart']) {
-    iabShown['cart'] = true;
-    setTimeout(() => {
-      document.getElementById('iab-tag').textContent = 'Folia';
-      document.getElementById('iab-title').textContent = 'Your cart is ready';
-      document.getElementById('iab-body').textContent = `You have ${cartCount()} plant${cartCount() > 1 ? 's' : ''} in your cart. Ready to complete your order?`;
-      document.getElementById('iab-action').textContent = 'Complete order';
-      document.getElementById('iab-action').onclick = () => { placeOrder(); closeIAB(); };
-      document.getElementById('in-app-msg').classList.add('show');
-      cioTrack('in_app_message_shown', { trigger: 'cart_viewed', cart_value: cartTotal() });
-    }, 1500);
-  }
-}
-
-function triggerPostPurchaseIAB() {
-  setTimeout(() => {
-    document.getElementById('iab-tag').textContent = 'Care reminder';
-    document.getElementById('iab-title').textContent = 'Set up care reminders';
-    document.getElementById('iab-body').textContent = 'Get weekly watering reminders and repotting alerts for your new plants.';
-    document.getElementById('iab-action').textContent = 'Enable reminders';
-    document.getElementById('iab-action').onclick = () => {
-      cioTrack('care_reminders_enabled', { source: 'post_purchase_iab' });
-      closeIAB();
-    };
-    document.getElementById('in-app-msg').classList.add('show');
-    cioTrack('in_app_message_shown', { trigger: 'post_purchase' });
-  }, 2000);
-}
-
-function closeIAB() {
-  document.getElementById('in-app-msg').classList.remove('show');
-  cioTrack('in_app_message_dismissed', {});
 }
 
 // ─────────────────────────────────────────────
@@ -2270,7 +1980,6 @@ let adminSettings = adminLoad('settings', {
 });
 
 let adminEvents = adminLoad('events', null);
-let adminMessages = adminLoad('messages', null);
 
 // Merge persisted plant edits into PLANTS array (edits only, never replace)
 try {
@@ -2299,34 +2008,8 @@ const DEFAULT_EVENTS = [
   { key: 'user_logged_in',            label: 'User logged in',            enabled: true  },
   { key: 'plant_saved',               label: 'Plant saved',               enabled: true  },
   { key: 'plant_unsaved',             label: 'Plant unsaved',             enabled: true  },
-  { key: 'in_app_message_shown',      label: 'In-app message shown',      enabled: true  },
-  { key: 'in_app_message_dismissed',  label: 'In-app message dismissed',  enabled: true  },
-  { key: 'care_reminders_enabled',    label: 'Care reminders enabled',    enabled: true  },
 ];
 let eventConfig = adminEvents || DEFAULT_EVENTS.map(e => ({...e}));
-
-// Default IAB messages
-const DEFAULT_MESSAGES = [
-  {
-    id: 'cart',
-    trigger: 'Cart page viewed (with items)',
-    tag: 'Folia',
-    title: 'Your cart is ready',
-    body: 'You have items in your cart. Ready to complete your order?',
-    action: 'Complete order',
-    enabled: true
-  },
-  {
-    id: 'post_purchase',
-    trigger: 'After order confirmation',
-    tag: 'Care reminder',
-    title: 'Set up care reminders',
-    body: 'Get weekly watering reminders and repotting alerts for your new plants.',
-    action: 'Enable reminders',
-    enabled: true
-  }
-];
-let messageConfig = adminMessages || DEFAULT_MESSAGES.map(m => ({...m}));
 
 // Override cioTrack to respect event enabled/disabled
 const _origCioTrack = cioTrack;
@@ -2370,7 +2053,6 @@ function checkPin() {
     document.getElementById('admin-content').style.display = 'block';
     renderAdminProducts();
     renderAdminEvents();
-    renderAdminMessages();
     populateAdminSettings();
   } else {
     document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
@@ -2537,56 +2219,6 @@ function saveEvents() {
 }
 
 // ─────────────────────────────────────────────
-// ADMIN — MESSAGES
-// ─────────────────────────────────────────────
-function renderAdminMessages() {
-  const el = document.getElementById('admin-message-list');
-  el.innerHTML = messageConfig.map((msg, i) => `
-    <div class="admin-card" style="margin-bottom:16px">
-      <div class="admin-card-header">
-        <div>
-          <div class="admin-card-title">${msg.id === 'cart' ? 'Cart message' : 'Post-purchase message'}</div>
-          <div style="font-size:12px;color:var(--ink-faint);margin-top:2px">Trigger: ${msg.trigger}</div>
-        </div>
-        <button class="toggle ${msg.enabled ? 'on' : ''}" id="msg-toggle-${i}" onclick="toggleMessage(${i})"></button>
-      </div>
-      <div class="admin-grid-2" style="margin-bottom:12px">
-        <div class="admin-field">
-          <label class="admin-label">Tag / label</label>
-          <input class="admin-input" id="msg-tag-${i}" type="text" value="${msg.tag}"/>
-        </div>
-        <div class="admin-field">
-          <label class="admin-label">Button text</label>
-          <input class="admin-input" id="msg-action-${i}" type="text" value="${msg.action}"/>
-        </div>
-      </div>
-      <div class="admin-field" style="margin-bottom:12px">
-        <label class="admin-label">Title</label>
-        <input class="admin-input" id="msg-title-${i}" type="text" value="${msg.title}"/>
-      </div>
-      <div class="admin-field">
-        <label class="admin-label">Body copy</label>
-        <textarea class="admin-textarea" id="msg-body-${i}">${msg.body}</textarea>
-      </div>
-    </div>`).join('');
-}
-
-function toggleMessage(i) {
-  messageConfig[i].enabled = !messageConfig[i].enabled;
-  document.getElementById('msg-toggle-' + i).classList.toggle('on', messageConfig[i].enabled);
-}
-
-function saveMessages() {
-  messageConfig.forEach((msg, i) => {
-    msg.tag    = document.getElementById('msg-tag-' + i)?.value.trim() || msg.tag;
-    msg.title  = document.getElementById('msg-title-' + i)?.value.trim() || msg.title;
-    msg.body   = document.getElementById('msg-body-' + i)?.value.trim() || msg.body;
-    msg.action = document.getElementById('msg-action-' + i)?.value.trim() || msg.action;
-  });
-  adminSave('messages', messageConfig);
-  showToast('✓', 'Messages saved', '');
-}
-
 // ─────────────────────────────────────────────
 // ADMIN — SETTINGS
 // ─────────────────────────────────────────────
@@ -2611,7 +2243,7 @@ function saveSettings() {
 
 function resetAdminSettings() {
   if (!confirm('Reset all admin settings to defaults? This cannot be undone.')) return;
-  ['settings','plants','events','messages'].forEach(k => localStorage.removeItem('folia_' + k));
+  ['settings','plants','events'].forEach(k => localStorage.removeItem('folia_' + k));
   location.reload();
 }
 
@@ -2619,47 +2251,6 @@ function clearPlantCache() {
   try { localStorage.removeItem('folia_plants'); } catch(e) {}
   showToast('✓', 'Product cache cleared', 'Reloading...');
   setTimeout(() => location.reload(), 800);
-}
-
-// ─────────────────────────────────────────────
-// OVERRIDE IAB to use messageConfig
-// ─────────────────────────────────────────────
-function getMessageConfig(id) {
-  return messageConfig.find(m => m.id === id) || null;
-}
-
-// Patch triggerCartIAB and triggerPostPurchaseIAB to use config
-function triggerCartIAB() {
-  const msg = getMessageConfig('cart');
-  if (cartCount() > 0 && !iabShown['cart'] && msg && msg.enabled) {
-    iabShown['cart'] = true;
-    setTimeout(() => {
-      document.getElementById('iab-tag').textContent    = msg.tag;
-      document.getElementById('iab-title').textContent  = msg.title;
-      document.getElementById('iab-body').textContent   = msg.body;
-      document.getElementById('iab-action').textContent = msg.action;
-      document.getElementById('iab-action').onclick = () => { navigate('cart'); closeIAB(); };
-      document.getElementById('in-app-msg').classList.add('show');
-      cioTrack('in_app_message_shown', { trigger: 'cart_viewed', cart_value: cartTotal() });
-    }, 1500);
-  }
-}
-
-function triggerPostPurchaseIAB() {
-  const msg = getMessageConfig('post_purchase');
-  if (!msg || !msg.enabled) return;
-  setTimeout(() => {
-    document.getElementById('iab-tag').textContent    = msg.tag;
-    document.getElementById('iab-title').textContent  = msg.title;
-    document.getElementById('iab-body').textContent   = msg.body;
-    document.getElementById('iab-action').textContent = msg.action;
-    document.getElementById('iab-action').onclick = () => {
-      cioTrack('care_reminders_enabled', { source: 'post_purchase_iab' });
-      closeIAB();
-    };
-    document.getElementById('in-app-msg').classList.add('show');
-    cioTrack('in_app_message_shown', { trigger: 'post_purchase' });
-  }, 2000);
 }
 
 // Apply persisted settings on load
