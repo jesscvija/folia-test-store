@@ -1,11 +1,9 @@
-// Vercel serverless function — creates a Plant object relationship in CIO
+// Vercel serverless function — creates/updates Plant object relationships in CIO
 // CX Demo workspace (223821) via Track API v2
 
 const SITE_ID = '28c49653b19139028059';
 const API_KEY = '0b0643bd51043c2dd51d';
 const BASE = 'https://track.customer.io/api/v2';
-
-// Basic auth header for Track API
 const auth = 'Basic ' + Buffer.from(`${SITE_ID}:${API_KEY}`).toString('base64');
 
 const authHeaders = {
@@ -26,7 +24,34 @@ module.exports = async function handler(req, res) {
   if (!plant || !user) return res.status(400).json({ error: 'plant and user required' });
 
   try {
-    const isUnsave = action === 'unsaved';
+    let cioRelationships;
+
+    if (action === 'unsaved') {
+      cioRelationships = [{
+        identifiers: { email: user.email },
+        action: 'remove_relationship'
+      }];
+    } else if (action === 'purchased') {
+      // Update existing relationship — set purchased to true
+      cioRelationships = [{
+        identifiers: { email: user.email },
+        action: 'add_relationship',
+        relationship_attributes: {
+          purchased: true
+        }
+      }];
+    } else {
+      // saved — create new relationship
+      cioRelationships = [{
+        identifiers: { email: user.email },
+        action: 'add_relationship',
+        relationship_attributes: {
+          saved_at: Math.floor(Date.now() / 1000),
+          source: source || 'store',
+          purchased: false
+        }
+      }];
+    }
 
     const payload = {
       type: 'object',
@@ -35,31 +60,20 @@ module.exports = async function handler(req, res) {
         object_id: plant.id
       },
       action: 'identify',
-      cio_relationships: isUnsave ? [{
-        identifiers: { email: user.email },
-        action: 'remove_relationship'
-      }] : [{
-        identifiers: { email: user.email },
-        action: 'add_relationship',
-        relationship_attributes: {
-          saved_at: Math.floor(Date.now() / 1000),
-          source: source || 'store',
-          purchased: false
-        }
-      }]
+      cio_relationships: cioRelationships
     };
 
-    const res2 = await fetch(`${BASE}/entity`, {
+    const r = await fetch(`${BASE}/entity`, {
       method: 'POST',
       headers: authHeaders,
       body: JSON.stringify(payload)
     });
 
-    const text = await res2.text();
+    const text = await r.text();
     let data = null;
     try { data = text ? JSON.parse(text) : null; } catch(e) { data = text; }
 
-    return res.status(200).json({ ok: res2.ok, status: res2.status, response: data });
+    return res.status(200).json({ ok: r.ok, status: r.status, response: data });
 
   } catch (err) {
     return res.status(200).json({ ok: false, error: err.message });
