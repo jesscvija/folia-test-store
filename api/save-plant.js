@@ -7,20 +7,12 @@ const authHeaders = {
   'Content-Type': 'application/json'
 };
 
-async function cioGet(path) {
-  const res = await fetch(`${BASE}${path}`, { headers: authHeaders });
+async function cioFetch(path, options = {}) {
+  const res = await fetch(`${BASE}${path}`, { headers: authHeaders, ...options });
   const text = await res.text();
-  return { ok: res.ok, status: res.status, data: text ? JSON.parse(text) : null };
-}
-
-async function cioPost(path, body, method = 'POST') {
-  const res = await fetch(`${BASE}${path}`, {
-    method,
-    headers: authHeaders,
-    body: JSON.stringify(body)
-  });
-  const text = await res.text();
-  return { ok: res.ok, status: res.status, data: text ? JSON.parse(text) : null };
+  let data = null;
+  try { data = text && text.trim() ? JSON.parse(text) : null; } catch(e) { data = text; }
+  return { ok: res.ok, status: res.status, data };
 }
 
 module.exports = async function handler(req, res) {
@@ -36,30 +28,22 @@ module.exports = async function handler(req, res) {
   if (!plant || !user) return res.status(400).json({ error: 'plant and user required' });
 
   try {
-    // Step 1: Find person by email search
-    // Per CIO docs: encode @ as %40, + as %2B
-    const emailParam = user.email
-      .replace(/\+/g, '%2B')
-      .replace(/@/g, '%40');
-
-    const { ok: pOk, data: pData } = await cioGet(
-      `/environments/${CIO_ENV_ID}/customers?email=${emailParam}`
-    );
-    if (!pOk || !pData?.customers?.length) {
-      return res.status(200).json({ ok: false, reason: 'person_not_found', email: user.email });
+    // Step 1: Find person by email
+    const emailParam = user.email.replace(/\+/g, '%2B').replace(/@/g, '%40');
+    const p = await cioFetch(`/environments/${CIO_ENV_ID}/customers?email=${emailParam}`);
+    if (!p.ok || !p.data?.customers?.length) {
+      return res.status(200).json({ ok: false, reason: 'person_not_found', pStatus: p.status, pData: p.data });
     }
-    const personId = pData.customers[0].id;
+    const personId = p.data.customers[0].id;
 
-    // Step 2: Get object internal id
-    const { ok: oOk, data: oData } = await cioGet(
-      `/environments/${CIO_ENV_ID}/object_types/1/objects/${plant.id}`
-    );
-    if (!oOk || !oData?.object?.id) {
-      return res.status(200).json({ ok: false, reason: 'object_not_found', plant_id: plant.id });
+    // Step 2: Get object
+    const o = await cioFetch(`/environments/${CIO_ENV_ID}/object_types/1/objects/${plant.id}`);
+    if (!o.ok || !o.data?.object?.id) {
+      return res.status(200).json({ ok: false, reason: 'object_not_found', oStatus: o.status, oData: o.data });
     }
-    const objectId = oData.object.id;
+    const objectId = o.data.object.id;
 
-    // Step 3: Create or remove relationship
+    // Step 3: Create/remove relationship
     const relBody = {
       relationships: [{
         entity1_type: 'customer',
@@ -76,16 +60,15 @@ module.exports = async function handler(req, res) {
       }]
     };
 
-    const method = action === 'unsaved' ? 'DELETE' : 'POST';
-    const { ok: rOk, status: rStatus, data: rData } = await cioPost(
-      `/environments/${CIO_ENV_ID}/relationships`,
-      relBody,
-      method
-    );
+    const r = await cioFetch(`/environments/${CIO_ENV_ID}/relationships`, {
+      method: action === 'unsaved' ? 'DELETE' : 'POST',
+      headers: authHeaders,
+      body: JSON.stringify(relBody)
+    });
 
-    return res.status(200).json({ ok: rOk, status: rStatus, personId, objectId, response: rData });
+    return res.status(200).json({ ok: r.ok, status: r.status, personId, objectId, response: r.data });
 
   } catch (err) {
-    return res.status(200).json({ ok: false, error: err.message });
+    return res.status(200).json({ ok: false, error: err.message, stack: err.stack?.slice(0, 300) });
   }
 };
