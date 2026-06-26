@@ -1494,6 +1494,21 @@ function cioObjectRelationship(action, plant) {
     plant_name: plant.name,
     object_type_id: '1'
   });
+
+  // Create/remove object relationship in solutions demo workspace via App API
+  const isDefault = !localStorage.getItem('folia_write_key');
+  if (isDefault && state.user) {
+    fetch('/api/save-plant', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plant: plant,
+        user: state.user,
+        source: state.currentPage === 'detail' ? 'product_detail' : state.currentPage,
+        action: action === 'add' ? 'saved' : 'unsaved'
+      })
+    }).catch(() => {});
+  }
 }
 
 // Toast removed — no-op stub kept for any remaining references
