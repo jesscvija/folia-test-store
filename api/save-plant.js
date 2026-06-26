@@ -1,19 +1,17 @@
-const CIO_APP_API_KEY = 'b50179c68d7b16476a11b0e524eb17be';
-const CIO_ENV_ID = '223821';
-const BASE = 'https://fly.customer.io/v1';
+// Vercel serverless function — creates a Plant object relationship in CIO
+// CX Demo workspace (223821) via Track API v2
+
+const SITE_ID = '28c49653b19139028059';
+const API_KEY = '0b0643bd51043c2dd51d';
+const BASE = 'https://track.customer.io/api/v2';
+
+// Basic auth header for Track API
+const auth = 'Basic ' + Buffer.from(`${SITE_ID}:${API_KEY}`).toString('base64');
 
 const authHeaders = {
-  'Authorization': `Bearer ${CIO_APP_API_KEY}`,
+  'Authorization': auth,
   'Content-Type': 'application/json'
 };
-
-async function cioFetch(path, options = {}) {
-  const res = await fetch(`${BASE}${path}`, { headers: authHeaders, ...options });
-  const text = await res.text();
-  let data = null;
-  try { data = text && text.trim() ? JSON.parse(text) : null; } catch(e) { data = text; }
-  return { ok: res.ok, status: res.status, data };
-}
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -28,46 +26,40 @@ module.exports = async function handler(req, res) {
   if (!plant || !user) return res.status(400).json({ error: 'plant and user required' });
 
   try {
-    // Step 1: Find person by email
-    const url = new URL(`${BASE}/environments/${CIO_ENV_ID}/customers`);
-    url.searchParams.set('email', user.email);
-    const p = await cioFetch(url.toString().replace(BASE, ''));
-    if (!p.ok || !p.data?.customers?.length) {
-      return res.status(200).json({ ok: false, reason: 'person_not_found', pStatus: p.status, pData: p.data });
-    }
-    const personId = p.data.customers[0].id;
+    const isUnsave = action === 'unsaved';
 
-    // Step 2: Get object
-    const o = await cioFetch(`/environments/${CIO_ENV_ID}/object_types/1/objects/${plant.id}`);
-    if (!o.ok || !o.data?.object?.id) {
-      return res.status(200).json({ ok: false, reason: 'object_not_found', oStatus: o.status, oData: o.data });
-    }
-    const objectId = o.data.object.id;
-
-    // Step 3: Create/remove relationship
-    const relBody = {
-      relationships: [{
-        entity1_type: 'customer',
-        entity1_id: personId,
-        entity2_type: 'object',
-        entity2_id: objectId,
-        ...(action !== 'unsaved' && {
-          attributes: {
-            saved_at: Math.floor(Date.now() / 1000),
-            source: source || 'store',
-            purchased: false
-          }
-        })
+    const payload = {
+      type: 'object',
+      identifiers: {
+        object_type_id: '1',
+        object_id: plant.id
+      },
+      action: 'identify',
+      cio_relationships: isUnsave ? [{
+        identifiers: { email: user.email },
+        action: 'remove_relationship'
+      }] : [{
+        identifiers: { email: user.email },
+        action: 'add_relationship',
+        relationship_attributes: {
+          saved_at: Math.floor(Date.now() / 1000),
+          source: source || 'store',
+          purchased: false
+        }
       }]
     };
 
-    const r = await cioFetch(`/environments/${CIO_ENV_ID}/relationships`, {
-      method: action === 'unsaved' ? 'DELETE' : 'POST',
+    const res2 = await fetch(`${BASE}/entity`, {
+      method: 'POST',
       headers: authHeaders,
-      body: JSON.stringify(relBody)
+      body: JSON.stringify(payload)
     });
 
-    return res.status(200).json({ ok: r.ok, status: r.status, personId, objectId, response: r.data });
+    const text = await res2.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch(e) { data = text; }
+
+    return res.status(200).json({ ok: res2.ok, status: res2.status, response: data });
 
   } catch (err) {
     return res.status(200).json({ ok: false, error: err.message });
