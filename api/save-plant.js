@@ -1,5 +1,5 @@
 // Vercel serverless function — creates a Plant object relationship in CIO
-// CX Demo workspace (223821) — only called from default workspace
+// CX Demo workspace (223821)
 
 const CIO_APP_API_KEY = 'b50179c68d7b16476a11b0e524eb17be';
 
@@ -16,6 +16,8 @@ module.exports = async function handler(req, res) {
   if (!plant || !user) return res.status(400).json({ error: 'plant and user required' });
 
   try {
+    const isUnsave = action === 'unsaved';
+
     const payload = {
       type: 'object',
       identifiers: {
@@ -24,19 +26,23 @@ module.exports = async function handler(req, res) {
       },
       action: 'identify',
       cio_relationships: [
-        {
+        isUnsave ? {
           identifiers: { email: user.email },
-          action: action === 'unsaved' ? 'remove_relationship' : 'add_relationship',
-          relationship_attributes: action !== 'unsaved' ? {
+          action: 'remove_relationship'
+        } : {
+          identifiers: { email: user.email },
+          action: 'add_relationship',
+          relationship_attributes: {
             saved_at: Math.floor(Date.now() / 1000),
             source: source || 'store',
             purchased: false
-          } : undefined
+          }
         }
       ]
     };
 
-    const response = await fetch('https://track.customer.io/api/v2/entity', {
+    // Use App API (api.customer.io) with Bearer token
+    const response = await fetch('https://api.customer.io/v2/entity', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CIO_APP_API_KEY}`,
@@ -45,9 +51,10 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify(payload)
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      const err = await response.text();
-      return res.status(response.status).json({ error: err });
+      return res.status(response.status).json({ error: responseText });
     }
 
     return res.status(200).json({ ok: true });
