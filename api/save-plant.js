@@ -19,12 +19,19 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { plant, user, source, action } = req.body;
+  // Parse body manually if needed
+  let body = req.body;
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch(e) {
+      return res.status(400).json({ error: 'Invalid JSON body' });
+    }
+  }
+
+  const { plant, user, source, action } = body || {};
   if (!plant || !user) return res.status(400).json({ error: 'plant and user required' });
 
   try {
     // Step 1: Look up person by email
-    // Encode @ as %40, + as %2B for CIO email search
     const encodedEmail = user.email.replace(/\+/g, '%2B').replace(/@/g, '%40');
     const personRes = await fetch(
       `${BASE}/environments/${CIO_ENV_ID}/customers?email=${encodedEmail}`,
@@ -53,7 +60,7 @@ module.exports = async function handler(req, res) {
 
     // Step 3: Create or delete relationship
     const method = action === 'unsaved' ? 'DELETE' : 'POST';
-    const body = {
+    const relBody = {
       relationships: [{
         entity1_type: 'customer',
         entity1_id: personId,
@@ -71,7 +78,7 @@ module.exports = async function handler(req, res) {
 
     const relRes = await fetch(
       `${BASE}/environments/${CIO_ENV_ID}/relationships`,
-      { method, headers: authHeaders, body: JSON.stringify(body) }
+      { method, headers: authHeaders, body: JSON.stringify(relBody) }
     );
 
     const relText = await relRes.text();
