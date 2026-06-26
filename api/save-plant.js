@@ -7,6 +7,22 @@ const authHeaders = {
   'Content-Type': 'application/json'
 };
 
+async function cioGet(path) {
+  const res = await fetch(`${BASE}${path}`, { headers: authHeaders });
+  const text = await res.text();
+  return { ok: res.ok, status: res.status, data: text ? JSON.parse(text) : null };
+}
+
+async function cioPost(path, body, method = 'POST') {
+  const res = await fetch(`${BASE}${path}`, {
+    method,
+    headers: authHeaders,
+    body: JSON.stringify(body)
+  });
+  const text = await res.text();
+  return { ok: res.ok, status: res.status, data: text ? JSON.parse(text) : null };
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,33 +36,30 @@ module.exports = async function handler(req, res) {
   if (!plant || !user) return res.status(400).json({ error: 'plant and user required' });
 
   try {
-    // Step 1: Look up person by their external ID (email used as id in identify)
-    // Use the customer_id path param instead of email search to avoid encoding issues
-    const personRes = await fetch(
-      `${BASE}/environments/${CIO_ENV_ID}/customers/${encodeURIComponent(user.email)}`,
-      { headers: authHeaders }
+    // Step 1: Find person by email search
+    // Per CIO docs: encode @ as %40, + as %2B
+    const emailParam = user.email
+      .replace(/\+/g, '%2B')
+      .replace(/@/g, '%40');
+
+    const { ok: pOk, data: pData } = await cioGet(
+      `/environments/${CIO_ENV_ID}/customers?email=${emailParam}`
     );
-    const personText = await personRes.text();
-    if (!personRes.ok) {
-      return res.status(200).json({ ok: false, reason: 'person_lookup_failed', status: personRes.status, detail: personText.slice(0, 200) });
+    if (!pOk || !pData?.customers?.length) {
+      return res.status(200).json({ ok: false, reason: 'person_not_found', email: user.email });
     }
-    const personData = JSON.parse(personText);
-    const personId = personData.customer?.id || personData.id;
-    if (!personId) return res.status(200).json({ ok: false, reason: 'person_id_missing', data: personText.slice(0, 200) });
+    const personId = pData.customers[0].id;
 
-    // Step 2: Look up object's internal id
-    const objectRes = await fetch(
-      `${BASE}/environments/${CIO_ENV_ID}/object_types/1/objects/${plant.id}`,
-      { headers: authHeaders }
+    // Step 2: Get object internal id
+    const { ok: oOk, data: oData } = await cioGet(
+      `/environments/${CIO_ENV_ID}/object_types/1/objects/${plant.id}`
     );
-    const objectText = await objectRes.text();
-    if (!objectRes.ok) return res.status(200).json({ ok: false, reason: 'object_not_found', detail: objectText.slice(0, 200) });
-    const objectData = JSON.parse(objectText);
-    const objectId = objectData.object?.id;
-    if (!objectId) return res.status(200).json({ ok: false, reason: 'object_id_missing' });
+    if (!oOk || !oData?.object?.id) {
+      return res.status(200).json({ ok: false, reason: 'object_not_found', plant_id: plant.id });
+    }
+    const objectId = oData.object.id;
 
-    // Step 3: Create or delete relationship
-    const method = action === 'unsaved' ? 'DELETE' : 'POST';
+    // Step 3: Create or remove relationship
     const relBody = {
       relationships: [{
         entity1_type: 'customer',
@@ -63,13 +76,14 @@ module.exports = async function handler(req, res) {
       }]
     };
 
-    const relRes = await fetch(
-      `${BASE}/environments/${CIO_ENV_ID}/relationships`,
-      { method, headers: authHeaders, body: JSON.stringify(relBody) }
+    const method = action === 'unsaved' ? 'DELETE' : 'POST';
+    const { ok: rOk, status: rStatus, data: rData } = await cioPost(
+      `/environments/${CIO_ENV_ID}/relationships`,
+      relBody,
+      method
     );
-    const relText = await relRes.text();
 
-    return res.status(200).json({ ok: relRes.ok, status: relRes.status, personId, objectId, response: relText.slice(0, 200) });
+    return res.status(200).json({ ok: rOk, status: rStatus, personId, objectId, response: rData });
 
   } catch (err) {
     return res.status(200).json({ ok: false, error: err.message });
