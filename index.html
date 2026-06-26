@@ -1407,7 +1407,8 @@ function loadAnalyticsJS(writeKey) {
           }
         }
       });
-      analytics.page();
+      // Small delay to let in-app plugin initialize before firing page event
+      setTimeout(function() { analytics.page(); }, 300);
     }
   }();
 }
