@@ -28,18 +28,19 @@ module.exports = async function handler(req, res) {
   if (!plant || !user) return res.status(400).json({ error: 'plant and user required' });
 
   try {
-    // Step 1: Find person by email
-    const emailParam = user.email.replace(/\+/g, '%2B').replace(/@/g, '%40');
-    const p = await cioFetch(`/environments/${CIO_ENV_ID}/customers?email=${emailParam}`);
+    // Step 1: Find person — use URL constructor to handle encoding correctly
+    const url = new URL(`${BASE}/environments/${CIO_ENV_ID}/customers`);
+    url.searchParams.set('email', user.email);
+    const p = await cioFetch(url.toString().replace(BASE, ''));
     if (!p.ok || !p.data?.customers?.length) {
-      return res.status(200).json({ ok: false, reason: 'person_not_found', pStatus: p.status, pData: p.data });
+      return res.status(200).json({ ok: false, reason: 'person_not_found', pStatus: p.status, email: user.email });
     }
     const personId = p.data.customers[0].id;
 
     // Step 2: Get object
     const o = await cioFetch(`/environments/${CIO_ENV_ID}/object_types/1/objects/${plant.id}`);
     if (!o.ok || !o.data?.object?.id) {
-      return res.status(200).json({ ok: false, reason: 'object_not_found', oStatus: o.status, oData: o.data });
+      return res.status(200).json({ ok: false, reason: 'object_not_found', oStatus: o.status });
     }
     const objectId = o.data.object.id;
 
@@ -69,6 +70,6 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: r.ok, status: r.status, personId, objectId, response: r.data });
 
   } catch (err) {
-    return res.status(200).json({ ok: false, error: err.message, stack: err.stack?.slice(0, 300) });
+    return res.status(200).json({ ok: false, error: err.message });
   }
 };
