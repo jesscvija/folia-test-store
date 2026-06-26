@@ -1374,12 +1374,6 @@ function plantSVG(plant, size = 'card') {
 // ─────────────────────────────────────────────
 const DEFAULT_WRITE_KEY = '4f20b05015a8f28df59f';
 
-function getInAppConfig(writeKey) {
-  const config = { anonymousInApp: true };
-  if (writeKey !== DEFAULT_WRITE_KEY) config.siteId = writeKey;
-  return config;
-}
-
 function loadAnalyticsJS(writeKey) {
   if (window.cioanalytics && window.cioanalytics.initialized) {
     window.cioanalytics = undefined;
@@ -1408,7 +1402,9 @@ function loadAnalyticsJS(writeKey) {
       analytics.SNIPPET_VERSION="4.15.3";
       analytics.load(writeKey, {
         integrations: {
-          "Customer.io In-App Plugin": getInAppConfig(writeKey)
+          "Customer.io In-App Plugin": {
+            anonymousInApp: true
+          }
         }
       });
       analytics.page();
@@ -1438,7 +1434,7 @@ function toggleWorkspaceSwitcher() {
 
 function switchWorkspace() {
   const key = document.getElementById('ws-write-key').value.trim();
-  if (!key) { showToast('⚠', 'No write key entered', 'Paste your Analytics.js write key'); return; }
+  if (!key) return;
   localStorage.setItem('folia_write_key', key);
   location.reload();
 }
