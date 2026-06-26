@@ -23,26 +23,33 @@ module.exports = async function handler(req, res) {
   if (!plant || !user) return res.status(400).json({ error: 'plant and user required' });
 
   try {
-    // Step 1: Look up person's internal id by email
+    // Step 1: Look up person by email
+    // Encode @ as %40, + as %2B for CIO email search
+    const encodedEmail = user.email.replace(/\+/g, '%2B').replace(/@/g, '%40');
     const personRes = await fetch(
-      `${BASE}/environments/${CIO_ENV_ID}/customers?email=${encodeURIComponent(user.email)}`,
+      `${BASE}/environments/${CIO_ENV_ID}/customers?email=${encodedEmail}`,
       { headers: authHeaders }
     );
-    if (!personRes.ok) return res.status(personRes.status).json({ error: 'Person lookup failed' });
     const personData = await personRes.json();
     const person = personData.customers?.[0];
-    if (!person) return res.status(404).json({ error: 'Person not found in CIO' });
-    const personId = person.id; // raw hex internal id
+    if (!person) {
+      return res.status(200).json({ ok: false, reason: 'person_not_found', email: user.email });
+    }
+    const personId = person.id;
 
     // Step 2: Look up object's internal id
     const objectRes = await fetch(
       `${BASE}/environments/${CIO_ENV_ID}/object_types/1/objects/${plant.id}`,
       { headers: authHeaders }
     );
-    if (!objectRes.ok) return res.status(objectRes.status).json({ error: 'Object lookup failed' });
+    if (!objectRes.ok) {
+      return res.status(200).json({ ok: false, reason: 'object_not_found', plant_id: plant.id });
+    }
     const objectData = await objectRes.json();
-    const objectId = objectData.object?.id; // ob-prefixed internal id
-    if (!objectId) return res.status(404).json({ error: 'Object not found in CIO' });
+    const objectId = objectData.object?.id;
+    if (!objectId) {
+      return res.status(200).json({ ok: false, reason: 'object_id_missing' });
+    }
 
     // Step 3: Create or delete relationship
     const method = action === 'unsaved' ? 'DELETE' : 'POST';
@@ -67,14 +74,17 @@ module.exports = async function handler(req, res) {
       { method, headers: authHeaders, body: JSON.stringify(body) }
     );
 
-    if (!relRes.ok) {
-      const err = await relRes.text();
-      return res.status(relRes.status).json({ error: err });
-    }
+    const relText = await relRes.text();
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({
+      ok: relRes.ok,
+      status: relRes.status,
+      personId,
+      objectId,
+      response: relText
+    });
 
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(200).json({ ok: false, error: err.message });
   }
 };
