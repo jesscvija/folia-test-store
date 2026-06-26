@@ -890,6 +890,7 @@
       </button>
       <div id="user-menu" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:8px;min-width:160px;z-index:300;box-shadow:0 4px 16px rgba(28,28,24,0.1);">
         <div id="user-menu-email" style="font-size:12px;color:var(--ink-faint);padding:6px 10px 10px;border-bottom:1px solid var(--border);margin-bottom:6px;"></div>
+        <button onclick="navigate('profile');document.getElementById('user-menu').style.display='none'" style="width:100%;text-align:left;background:none;border:none;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);cursor:pointer;border-radius:var(--radius);" onmouseover="this.style.background='var(--sage-light)'" onmouseout="this.style.background='none'">My profile</button>
         <button onclick="logOut()" style="width:100%;text-align:left;background:none;border:none;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--terracotta);cursor:pointer;border-radius:var(--radius);" onmouseover="this.style.background='var(--terracotta-light)'" onmouseout="this.style.background='none'">Sign out</button>
       </div>
     </div>
@@ -986,6 +987,54 @@
 <!-- CONFIRMATION -->
 <div id="page-confirmation" class="page">
   <div class="confirm-layout" id="confirm-content"></div>
+</div>
+
+<!-- PROFILE PAGE -->
+<div id="page-profile" class="page">
+  <div style="max-width:520px;margin:0 auto;padding:48px 24px 80px;">
+    <h1 style="font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:6px">Your profile</h1>
+    <p style="font-size:14px;color:var(--ink-muted);margin-bottom:32px">Your details are saved to Customer.io as person attributes.</p>
+    <div id="profile-form">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div>
+          <label class="form-label">First name</label>
+          <input class="form-input" type="text" id="profile-first" placeholder="Jane"/>
+        </div>
+        <div>
+          <label class="form-label">Last name</label>
+          <input class="form-input" type="text" id="profile-last" placeholder="Smith"/>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="profile-email" placeholder="your@email.com" readonly style="background:var(--sage-light);cursor:default;opacity:0.7"/>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="form-label">Street address</label>
+        <input class="form-input" type="text" id="profile-address" placeholder="123 Plant St"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div>
+          <label class="form-label">City</label>
+          <input class="form-input" type="text" id="profile-city" placeholder="London"/>
+        </div>
+        <div>
+          <label class="form-label">Postcode / ZIP</label>
+          <input class="form-input" type="text" id="profile-postcode" placeholder="EC1A 1BB"/>
+        </div>
+      </div>
+      <div style="margin-bottom:28px">
+        <label class="form-label">Country</label>
+        <input class="form-input" type="text" id="profile-country" placeholder="United Kingdom"/>
+      </div>
+      <button class="btn-primary" style="width:100%" onclick="saveProfile()">Save profile</button>
+      <div id="profile-saved-msg" style="display:none;text-align:center;margin-top:16px;font-size:13px;color:var(--sage);font-weight:500">✓ Profile saved to Customer.io</div>
+    </div>
+    <div id="profile-signin-prompt" style="display:none;text-align:center;padding:40px 0">
+      <p style="font-size:14px;color:var(--ink-muted);margin-bottom:20px">Sign in to view and edit your profile.</p>
+      <button class="btn-primary" onclick="openAuth()">Sign in</button>
+    </div>
+  </div>
 </div>
 
 <!-- ADMIN PAGE -->
@@ -1493,6 +1542,7 @@ function navigate(page, plantId) {
   if (page === 'collections') { renderCollections(); cioPage('Collections'); }
   if (page === 'cart') { renderCart(); cioPage('Cart', { item_count: cartCount() }); }
   if (page === 'wishlist') { renderWishlist(); cioPage('Wishlist'); }
+  if (page === 'profile') { renderProfile(); cioPage('Profile'); }
   if (page === 'confirmation') { cioPage('Order Confirmation'); }
   if (page === 'detail' && plantId) {
     const plant = PLANTS.find(p => p.id === plantId);
@@ -1908,8 +1958,66 @@ function submitAuth() {
 }
 
 // ─────────────────────────────────────────────
-// ADMIN — PERSISTENCE
+// PROFILE PAGE
 // ─────────────────────────────────────────────
+function renderProfile() {
+  const form = document.getElementById('profile-form');
+  const prompt = document.getElementById('profile-signin-prompt');
+  const savedMsg = document.getElementById('profile-saved-msg');
+  if (savedMsg) savedMsg.style.display = 'none';
+
+  if (!state.user) {
+    form.style.display = 'none';
+    prompt.style.display = 'block';
+    return;
+  }
+
+  form.style.display = 'block';
+  prompt.style.display = 'none';
+
+  // Pre-fill from state
+  document.getElementById('profile-email').value = state.user.email || '';
+  document.getElementById('profile-first').value = state.user.firstName || '';
+  document.getElementById('profile-last').value = state.user.lastName || '';
+  document.getElementById('profile-address').value = state.user.address || '';
+  document.getElementById('profile-city').value = state.user.city || '';
+  document.getElementById('profile-postcode').value = state.user.postcode || '';
+  document.getElementById('profile-country').value = state.user.country || '';
+}
+
+function saveProfile() {
+  if (!state.user) return;
+
+  const firstName = document.getElementById('profile-first').value.trim();
+  const lastName  = document.getElementById('profile-last').value.trim();
+  const address   = document.getElementById('profile-address').value.trim();
+  const city      = document.getElementById('profile-city').value.trim();
+  const postcode  = document.getElementById('profile-postcode').value.trim();
+  const country   = document.getElementById('profile-country').value.trim();
+  const fullName  = [firstName, lastName].filter(Boolean).join(' ') || state.user.name;
+
+  // Update local state
+  state.user = { ...state.user, firstName, lastName, name: fullName, address, city, postcode, country };
+  document.getElementById('nav-user-label').textContent = firstName || state.user.email.split('@')[0];
+
+  // Send identify with all attributes
+  cioIdentify({
+    id: state.user.email,
+    email: state.user.email,
+    name: fullName,
+    first_name: firstName,
+    last_name: lastName,
+    address: address,
+    city: city,
+    postcode: postcode,
+    country: country
+  });
+
+  // Show confirmation
+  const msg = document.getElementById('profile-saved-msg');
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 3000);
+}
 function adminLoad(key, fallback) {
   try { const v = localStorage.getItem('folia_' + key); return v ? JSON.parse(v) : fallback; } catch(e) { return fallback; }
 }
