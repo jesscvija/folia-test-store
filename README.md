@@ -1,6 +1,6 @@
-# Folia — Customer.io Test Store
+# Folia — Customer.io Demo Store
 
-A realistic e-commerce plant store for testing Customer.io integrations. Single HTML file, no build step, deploys to Vercel in under a minute.
+A realistic e-commerce plant store for demoing Customer.io features. Single HTML file, no build step, deploys to Vercel instantly.
 
 ---
 
@@ -8,22 +8,19 @@ A realistic e-commerce plant store for testing Customer.io integrations. Single 
 
 **Deploy to Vercel**
 
-1. Push this folder to a GitHub repo
-2. Go to vercel.com → Add New Project → Import the repo
+1. Push this repo to GitHub
+2. Go to vercel.com → Add New Project → import the repo
 3. Leave all settings as default → Deploy
-4. Your store is live at `your-project.vercel.app`
 
 **Connect Customer.io**
 
-The store defaults to the solutions demo workspace automatically. To use a different workspace, click **Switch workspace** in the black banner and paste your Analytics.js write key. Find it in Customer.io → Data Pipelines → Sources → your JS source → Settings → API Key.
+The store defaults to the CX Demo workspace automatically. To use a different workspace, click **Switch workspace** in the top banner and paste your Analytics.js write key. Find it in Customer.io → Data Pipelines → Sources → your JS source → Settings → API Key.
 
-To reset back to the solutions demo, click **Switch workspace → Reset to default**.
+To reset back to CX Demo, click **Switch workspace → Reset to default**.
 
 ---
 
 ## Events
-
-Every interaction fires a real event into Customer.io:
 
 | Event | Trigger |
 |---|---|
@@ -38,50 +35,62 @@ Every interaction fires a real event into Customer.io:
 | `plant_saved` | Saving/hearting a plant |
 | `plant_unsaved` | Removing a plant from saved |
 
-**Event properties**
+**Key event properties**
 
-`order_completed` includes: `order_id`, `revenue`, `currency`, `item_count`, `item_names`, `items[]`
+`order_completed` — `order_id`, `revenue`, `currency`, `item_count`, `item_names`, `items[]`
 
-`product_viewed` and `product_added_to_cart` include: `product_id`, `product_name`, `product_price`, `collection`, `care_level`
+`product_viewed` / `product_added_to_cart` — `product_id`, `product_name`, `product_price`, `collection`, `care_level`
 
-`user_signed_up` / `user_logged_in` include: `email`, `first_name`, `last_name`
+**Note:** Since this uses Analytics.js via Data Pipelines, event properties in Journeys Liquid are accessed as `{{ event.properties.revenue }}` not `{{ event.revenue }}`.
 
-**Identify**
+---
 
-Users are identified on signup, login, and checkout with: `id`, `email`, `name`, `first_name`, `last_name`
+## Identify
+
+Users are identified on signup, login, and checkout with: `id`, `email`, `name`, `first_name`, `last_name`, `created_at`
+
+Additional attributes are set via the **My profile** page: `address`, `city`, `postcode`, `country`
+
+---
+
+## Object relationships
+
+When a signed-in user saves a plant (hearts it), the store calls `cioanalytics.identify` with `cio_relationships` to create a relationship between the person and the Plant object (object type 1). Unsaving removes the relationship.
+
+Plant objects must exist in the workspace before relationships can be created. Use the provided `plants.csv` to import them via Data & Integrations → Objects → Plants → Import.
 
 ---
 
 ## In-app messages
 
-In-app messages come entirely from Customer.io campaigns — nothing is hardcoded in the store. Use page rules with `contains` to target pages:
+All in-app messages come from Customer.io campaigns — nothing is hardcoded. Use page rules to target pages:
 
-| Page | Rule |
+| Page | URL contains |
 |---|---|
-| Home | URL contains `/` |
-| Shop | URL contains `shop` |
-| Collections | URL contains `collections` |
-| Cart | URL contains `cart` |
-| Product detail | URL contains `product` |
-| Wishlist | URL contains `wishlist` |
-| Order confirmation | URL contains `confirmation` |
+| Home | `/` |
+| Shop | `shop` |
+| Cart | `cart` |
+| Product detail | `product` |
+| Wishlist | `wishlist` |
+| Order confirmation | `confirmation` |
+| Profile | `profile` |
 
-Anonymous in-app is enabled so messages can show before a user identifies.
+Anonymous in-app is enabled so messages show before a user identifies.
 
 ---
 
 ## Admin panel
 
-Access at `/#admin`. Enter the PIN set in Settings (default: change this before sharing with your team).
+Access at `/#admin`. Default PIN: `1234`.
 
 - **Products** — edit name, price, description, care level, badge
-- **Events** — rename events or disable them entirely
+- **Events** — rename events or disable them
 - **Settings** — store name, headline, cart abandonment timer, PIN
 
-Changes save to browser localStorage and apply instantly without a redeploy.
+Changes save to localStorage and apply instantly.
 
 ---
 
-## Workspace isolation
+## Workspace switcher
 
-Each person's browser holds their own write key in localStorage. Two people using the store simultaneously with different workspaces don't interfere with each other.
+Each browser session holds its own write key in localStorage. Multiple people can use the store simultaneously with different workspaces without interfering with each other.

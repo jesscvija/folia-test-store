@@ -1495,19 +1495,21 @@ function cioObjectRelationship(action, plant) {
     object_type_id: '1'
   });
 
-  // Create/remove object relationship in solutions demo workspace via App API
-  const isDefault = !localStorage.getItem('folia_write_key');
-  if (isDefault && state.user) {
-    fetch('/api/save-plant', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        plant: plant,
-        user: state.user,
-        source: state.currentPage === 'detail' ? 'product_detail' : state.currentPage,
-        action: action === 'add' ? 'saved' : 'unsaved'
-      })
-    }).catch(() => {});
+  if (!state.user) return;
+
+  // Set relationship via identify — works with Analytics.js
+  if (window.cioanalytics) {
+    cioanalytics.identify(state.user.email, {
+      cio_relationships: {
+        action: action === 'add' ? 'add_relationships' : 'remove_relationships',
+        relationships: [{
+          identifiers: {
+            object_type_id: '1',
+            object_id: plant.id
+          }
+        }]
+      }
+    });
   }
 }
 
