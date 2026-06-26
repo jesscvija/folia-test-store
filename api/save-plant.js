@@ -16,35 +16,9 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Read raw body
-  let rawBody = '';
-  try {
-    if (typeof req.body === 'object' && req.body !== null) {
-      rawBody = JSON.stringify(req.body);
-    } else if (typeof req.body === 'string') {
-      rawBody = req.body;
-    } else {
-      // Read from stream
-      await new Promise((resolve, reject) => {
-        let data = '';
-        req.on('data', chunk => { data += chunk; });
-        req.on('end', () => { rawBody = data; resolve(); });
-        req.on('error', reject);
-      });
-    }
-  } catch(e) {
-    return res.status(200).json({ ok: false, error: 'body read failed: ' + e.message });
-  }
-
-  let body;
-  try {
-    body = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
-  } catch(e) {
-    return res.status(200).json({ ok: false, error: 'JSON parse failed', raw: rawBody.slice(0, 100) });
-  }
-
-  const { plant, user, source, action } = body || {};
-  if (!plant || !user) return res.status(400).json({ error: 'plant and user required' });
+  // Vercel auto-parses JSON bodies — use req.body directly
+  const { plant, user, source, action } = req.body || {};
+  if (!plant || !user) return res.status(400).json({ error: 'plant and user required', body: typeof req.body });
 
   try {
     const encodedEmail = user.email.replace(/\+/g, '%2B').replace(/@/g, '%40');
@@ -54,14 +28,14 @@ module.exports = async function handler(req, res) {
     );
     const personData = await personRes.json();
     const person = personData.customers?.[0];
-    if (!person) return res.status(200).json({ ok: false, reason: 'person_not_found', email: user.email });
+    if (!person) return res.status(200).json({ ok: false, reason: 'person_not_found' });
     const personId = person.id;
 
     const objectRes = await fetch(
       `${BASE}/environments/${CIO_ENV_ID}/object_types/1/objects/${plant.id}`,
       { headers: authHeaders }
     );
-    if (!objectRes.ok) return res.status(200).json({ ok: false, reason: 'object_not_found', plant_id: plant.id });
+    if (!objectRes.ok) return res.status(200).json({ ok: false, reason: 'object_not_found' });
     const objectData = await objectRes.json();
     const objectId = objectData.object?.id;
     if (!objectId) return res.status(200).json({ ok: false, reason: 'object_id_missing' });
@@ -92,6 +66,6 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: relRes.ok, status: relRes.status, personId, objectId, response: relText });
 
   } catch (err) {
-    return res.status(200).json({ ok: false, error: err.message });
+    return res.status(200).json({ ok: false, error: err.message, stack: err.stack?.slice(0,200) });
   }
 };
