@@ -1859,21 +1859,20 @@ function placeOrder() {
   renderConfirmation(orderId, items, total, email);
   navigate('confirmation');
 
-  // Update purchased=true on any saved plants that were in this order
+  // Update purchased=true on any ordered plant that has a saved relationship in CIO
+  // We always try — if no relationship exists CIO handles it gracefully
   if (!localStorage.getItem('folia_write_key')) {
     items.forEach(item => {
-      if (state.saved.includes(item.plant.id)) {
-        fetch('/api/save-plant', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            plant: item.plant,
-            user: { email },
-            source: 'order',
-            action: 'purchased'
-          })
-        }).catch(() => {});
-      }
+      fetch('/api/save-plant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plant: item.plant,
+          user: { email },
+          source: 'order',
+          action: 'purchased'
+        })
+      }).catch(() => {});
     });
   }
 }
