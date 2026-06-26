@@ -1858,6 +1858,24 @@ function placeOrder() {
   updateCartBadge();
   renderConfirmation(orderId, items, total, email);
   navigate('confirmation');
+
+  // Update purchased=true on any saved plants that were in this order
+  if (!localStorage.getItem('folia_write_key')) {
+    items.forEach(item => {
+      if (state.saved.includes(item.plant.id)) {
+        fetch('/api/save-plant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            plant: item.plant,
+            user: { email },
+            source: 'order',
+            action: 'purchased'
+          })
+        }).catch(() => {});
+      }
+    });
+  }
 }
 
 function renderConfirmation(orderId, items, total, email) {
