@@ -1413,7 +1413,7 @@ function loadAnalyticsJS(writeKey) {
   }();
 }
 
-const sessionKey = localStorage.getItem('folia_write_key');
+const sessionKey = sessionStorage.getItem('folia_write_key');
 loadAnalyticsJS(sessionKey || DEFAULT_WRITE_KEY);
 
 if (sessionKey) {
@@ -1428,7 +1428,7 @@ function toggleWorkspaceSwitcher() {
   el.style.display = isOpen ? 'none' : 'flex';
   if (!isOpen) {
     document.getElementById('ws-write-key').focus();
-    const current = localStorage.getItem('folia_write_key') || '';
+    const current = sessionStorage.getItem('folia_write_key') || '';
     document.getElementById('ws-write-key').value = current;
   }
 }
@@ -1436,12 +1436,12 @@ function toggleWorkspaceSwitcher() {
 function switchWorkspace() {
   const key = document.getElementById('ws-write-key').value.trim();
   if (!key) return;
-  localStorage.setItem('folia_write_key', key);
+  sessionStorage.setItem('folia_write_key', key);
   location.reload();
 }
 
 function resetWorkspace() {
-  localStorage.removeItem('folia_write_key');
+  sessionStorage.removeItem('folia_write_key');
   location.reload();
 }
 
@@ -1499,7 +1499,7 @@ function cioObjectRelationship(action, plant) {
   if (!state.user) return;
 
   // Create/remove object relationship via serverless function
-  if (!localStorage.getItem('folia_write_key')) {
+  if (!sessionStorage.getItem('folia_write_key')) {
     fetch('/api/save-plant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1862,7 +1862,7 @@ function placeOrder() {
 
   // Update purchased=true on any ordered plant that has a saved relationship in CIO
   // We always try — if no relationship exists CIO handles it gracefully
-  if (!localStorage.getItem('folia_write_key')) {
+  if (!sessionStorage.getItem('folia_write_key')) {
     items.forEach(item => {
       fetch('/api/save-plant', {
         method: 'POST',
