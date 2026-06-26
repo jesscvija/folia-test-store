@@ -1403,6 +1403,7 @@ function loadAnalyticsJS(writeKey) {
       analytics.load(writeKey, {
         integrations: {
           "Customer.io In-App Plugin": {
+            siteId: writeKey,
             anonymousInApp: true
           }
         }
